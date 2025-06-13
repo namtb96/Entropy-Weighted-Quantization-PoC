@@ -14,11 +14,6 @@ __pycache__/
 
 # Model and cache directories
 models/
-quantized_models/
-entropy_cache/
-
-# Benchmark results
-benchmark_results/
 
 # Environment files
 .env
