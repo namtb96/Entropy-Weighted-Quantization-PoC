@@ -174,7 +174,7 @@ To reproduce these results:
 
 1.  **Install the required libraries:**
     ```bash
-    pip install torch transformers bitsandbytes psutil numpy
+    pip install -r requirements.txt
     ```
 
 2.  **Step 1: Generate the quantization plan (runs on CPU)**
