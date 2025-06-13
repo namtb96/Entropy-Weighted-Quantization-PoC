@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-EWQ Model Benchmark System (v5 - Enhanced with MMLU and Perplexity Tests)
+Original Model Benchmark System - WITHOUT EWQ Quantization
+
+Script này dùng để benchmark model gốc (không lượng tử hóa) để so sánh với kết quả EWQ.
+Bao gồm tất cả các bài test: MMLU, Perplexity và Generation tasks.
 
 Quy trình:
-1. Tải model gốc lên CPU.
-2. Tải kế hoạch lượng tử hóa đã cache.
-3. Áp dụng kế hoạch lên model trên CPU.
-4. Di chuyển model đã lượng tử hóa sang GPU.
-5. Chạy bộ benchmark toàn diện bao gồm MMLU và Perplexity với đầy đủ logging.
+1. Tải model gốc lên GPU với precision cao nhất có thể.
+2. Chạy toàn bộ bộ benchmark với đầy đủ logging.
+3. Lưu kết quả để so sánh với EWQ benchmark.
 """
 import torch
 import torch.nn as nn
@@ -18,24 +19,19 @@ import json
 import numpy as np
 import hashlib
 from pathlib import Path
-from typing import Dict, List, Tuple, Callable, Optional
+from typing import Dict, List, Tuple, Optional
 from datetime import datetime
 import gc
 import os
 import warnings
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import bitsandbytes.nn as bnb
-import requests
-import random
 from tqdm import tqdm
 
 warnings.filterwarnings("ignore")
 
-# === Cấu hình (Phải khớp với file plan generator) ===
+# === Cấu hình ===
 MODEL_ID = "unsloth/Meta-Llama-3.1-8B-Instruct"
 MODEL_CACHE_DIR = "./models"
-QUANTIZED_MODEL_CACHE_DIR = "./quantized_models"
-ENTROPY_THRESHOLD_FACTOR = 1.0
 
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
@@ -115,83 +111,73 @@ PERPLEXITY_PASSAGES = [
     "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to create oxygen and energy in the form of sugar."
 ]
 
-# === LOGIC LƯỢNG TỬ HÓA - SAO CHÉP TỪ main_cache_model.py ĐỂ ĐẢM BẢO NHẤT QUÁN ===
-
-def get_model_hash(model_id: str, config: dict) -> str:
-    config_str = f"{model_id}-{json.dumps(config, sort_keys=True)}"
+def get_model_hash(model_id: str) -> str:
+    """Tạo hash cho model gốc (không quantization)."""
+    config_str = f"{model_id}-original-no-quantization"
     return hashlib.sha256(config_str.encode()).hexdigest()[:16]
 
-def get_plan_path(model_hash: str) -> Path:
-    cache_dir = Path(QUANTIZED_MODEL_CACHE_DIR)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    return cache_dir / f"quant_plan_{model_hash}.json"
-
-def _find_and_replace(module: nn.Module, replacement_func: Callable, name_prefix=""):
-    for name, child in module.named_children():
-        full_name = f"{name_prefix}.{name}" if name_prefix else name
-        if isinstance(child, nn.Linear):
-            setattr(module, name, replacement_func(child, full_name))
-        else:
-            _find_and_replace(child, replacement_func, name_prefix=full_name)
-
-def apply_quantization_balanced(model: nn.Module, plan: Dict[int, str]) -> nn.Module:
-    print("  🔧 Applying balanced quantization plan on CPU...")
-    for block_idx, quant_type in plan.items():
-        if quant_type == "raw": continue
-        block = model.model.layers[block_idx]
-        block.to(torch.float16)
-        def replacement_function(linear_module, module_name):
-            if quant_type == "8-bit":
-                q_layer = bnb.Linear8bitLt(linear_module.in_features, linear_module.out_features, bias=linear_module.bias is not None, has_fp16_weights=False)
-            elif quant_type == "4-bit":
-                q_layer = bnb.Linear4bit(linear_module.in_features, linear_module.out_features, bias=linear_module.bias is not None, compute_dtype=torch.float16, quant_type="nf4")
-            else:
-                return linear_module
-            q_layer.weight.data.copy_(linear_module.weight.data)
-            if linear_module.bias is not None:
-                q_layer.bias.data.copy_(linear_module.bias.data)
-            return q_layer
-        _find_and_replace(block, replacement_function)
-    print("  ✅ Quantization plan applied successfully on CPU model!")
-    return model
-
-def check_quantized_model_exists(model_hash: str) -> bool:
-    return get_plan_path(model_hash).exists()
-
-def load_quantized_model(model_id: str, model_hash: str) -> Tuple[Optional[nn.Module], Optional[AutoTokenizer]]:
-    plan_path = get_plan_path(model_hash)
-    print(f"  📄 Loading quantization plan from: {plan_path}")
-    with open(plan_path, 'r') as f:
-        quant_plan = {int(k): v for k, v in json.load(f).items()}
-
-    print("  📥 Loading base model to CPU...")
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id, cache_dir=MODEL_CACHE_DIR, torch_dtype=torch.float16,
-        device_map="cpu", trust_remote_code=True)
+def load_original_model(model_id: str) -> Tuple[Optional[nn.Module], Optional[AutoTokenizer]]:
+    """Tải model gốc với precision cao nhất có thể."""
+    print("  📥 Loading original model to GPU...")
     
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_id, cache_dir=MODEL_CACHE_DIR, trust_remote_code=True)
-    if tokenizer.pad_token is None: tokenizer.pad_token = tokenizer.eos_token
-    
-    quantized_model = apply_quantization_balanced(model, quant_plan)
-    
-    print("  🚀 Deploying quantized model to GPU...")
+    # Kiểm tra VRAM available
     if torch.cuda.is_available():
-        quantized_model.to("cuda")
+        total_vram = torch.cuda.get_device_properties(0).total_memory / 1024**3
+        print(f"  💾 Available VRAM: {total_vram:.2f} GB")
+        
+        # Chọn precision dựa trên VRAM
+        if total_vram >= 16:
+            torch_dtype = torch.float32
+            print("  🎯 Using float32 precision (highest quality)")
+        elif total_vram >= 12:
+            torch_dtype = torch.float16
+            print("  🎯 Using float16 precision (balanced)")
+        else:
+            torch_dtype = torch.float16
+            print("  ⚠️ Using float16 precision (limited VRAM)")
+            
+        device_map = "auto"
     else:
-        print("  ⚠️ WARNING: No CUDA device found. Benchmark will run on CPU.")
+        print("  ⚠️ WARNING: No CUDA device found. Model will run on CPU.")
+        torch_dtype = torch.float32
+        device_map = "cpu"
+    
+    try:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            cache_dir=MODEL_CACHE_DIR,
+            torch_dtype=torch_dtype,
+            device_map=device_map,
+            trust_remote_code=True,
+            low_cpu_mem_usage=True if torch.cuda.is_available() else False
+        )
+        
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_id,
+            cache_dir=MODEL_CACHE_DIR,
+            trust_remote_code=True
+        )
+        
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+        
+        print("  ✅ Original model loaded successfully!")
+        return model, tokenizer
+        
+    except Exception as e:
+        print(f"  ❌ Failed to load original model: {e}")
+        return None, None
 
-    return quantized_model, tokenizer
 
+# === ORIGINAL MODEL BENCHMARK SUITE ===
 
-# === ENHANCED BENCHMARK SUITE VỚI MMLU VÀ PERPLEXITY ===
-
-class EnhancedBenchmarkSuite:
+class OriginalModelBenchmarkSuite:
     def __init__(self, model, tokenizer, model_hash: str):
         self.model = model
         self.tokenizer = tokenizer
         self.model_hash = model_hash
         self.device = next(model.parameters()).device
+        self.model_precision = str(next(model.parameters()).dtype)
         
     def get_memory_usage(self) -> Dict[str, float]:
         """Lấy thông tin sử dụng bộ nhớ (RAM & VRAM)."""
@@ -199,10 +185,16 @@ class EnhancedBenchmarkSuite:
         ram_gb = process.memory_info().rss / 1024**3
         
         gpu_allocated_gb = 0
+        gpu_reserved_gb = 0
         if torch.cuda.is_available():
             gpu_allocated_gb = torch.cuda.memory_allocated() / 1024**3
+            gpu_reserved_gb = torch.cuda.memory_reserved() / 1024**3
         
-        return {'ram_gb': ram_gb, 'gpu_allocated_gb': gpu_allocated_gb}
+        return {
+            'ram_gb': ram_gb, 
+            'gpu_allocated_gb': gpu_allocated_gb,
+            'gpu_reserved_gb': gpu_reserved_gb
+        }
     
     def generate_response(self, prompt: str, task_name: str = "") -> Dict:
         """Sinh response và đo lường hiệu năng chi tiết."""
@@ -246,7 +238,8 @@ class EnhancedBenchmarkSuite:
             'generation_time': round(generation_time, 2),
             'tokens_generated': tokens_generated,
             'tokens_per_second': round(tokens_per_second, 2),
-            'vram_usage_gb': round(memory_after['gpu_allocated_gb'], 2)
+            'vram_allocated_gb': round(memory_after['gpu_allocated_gb'], 2),
+            'vram_reserved_gb': round(memory_after['gpu_reserved_gb'], 2)
         }
 
     def run_mmlu_test(self) -> Dict:
@@ -379,9 +372,11 @@ class EnhancedBenchmarkSuite:
         }
 
     def run_full_benchmark(self) -> Dict:
-        """Chạy toàn bộ bộ benchmark bao gồm MMLU và Perplexity."""
-        print("\n🚀 Starting EWQ Model Comprehensive Benchmark (Enhanced with MMLU & Perplexity)")
+        """Chạy toàn bộ bộ benchmark trên model gốc."""
+        print("\n🚀 Starting Original Model Comprehensive Benchmark (NO QUANTIZATION)")
         print("=" * 80)
+        print(f"🎯 Model Precision: {self.model_precision}")
+        print(f"💾 Device: {self.device}")
         
         # === MMLU và Perplexity Tests ===
         print("\n🧪 Running Academic & Technical Evaluations...")
@@ -406,9 +401,25 @@ class EnhancedBenchmarkSuite:
                 "Hãy tóm tắt đoạn văn sau thành 3 ý chính: 'Các công nghệ thu giữ carbon (Carbon Capture Technologies) đang nổi lên như một giải pháp tiềm năng trong cuộc chiến chống biến đổi khí hậu. Các phương pháp chính bao gồm thu giữ sau đốt cháy, thu giữ trước đốt cháy và thu giữ từ không khí trực tiếp (DAC). Mặc dù có tiềm năng lớn, công nghệ này vẫn đối mặt với những thách thức về chi phí vận hành cao, hiệu quả năng lượng và vấn đề lưu trữ carbon an toàn trong dài hạn. Các chính phủ và tập đoàn lớn đang đầu tư hàng tỷ USD vào R&D để cải thiện hiệu quả và giảm giá thành, hy vọng biến nó thành một công cụ chủ chốt vào năm 2050.'",
                 "Tóm tắt ngắn gọn những sự kiện chính và ý nghĩa lịch sử của cuộc Cách mạng Công nghiệp lần thứ nhất, tập trung vào các phát minh quan trọng và tác động của nó đến xã hội."
             ],
+            "Creative Writing": [
+                "Viết đoạn mở đầu cho một câu chuyện ngắn thuộc thể loại khoa học viễn tưởng, trong đó nhân vật chính là một nhà thực vật học sống trên Sao Hỏa, người vừa phát hiện ra một loài cây có khả năng giao tiếp bằng ánh sáng.",
+                "Viết một bài văn ngắn (khoảng 150 từ) miêu tả cảnh một phiên chợ nổi trên sông Cửu Long vào buổi sáng sớm, tập trung vào âm thanh, màu sắc và mùi vị đặc trưng."
+            ],
+            "Question Answering": [
+                "Giải thích sự khác biệt cơ bản giữa năng lượng hạt nhân phân hạch (nuclear fission) và tổng hợp hạt nhân (nuclear fusion). Loại nào hiện đang được sử dụng trong các nhà máy điện?",
+                "Con đường tơ lụa là gì và nó có vai trò quan trọng như thế nào đối với sự phát triển của các nền văn minh cổ đại?"
+            ],
+            "Language Translation & Nuance": [
+                "Dịch đoạn văn sau sang tiếng Việt, chú ý giữ văn phong chuyên nghiệp: 'Our team is conducting a comprehensive due diligence process to assess the viability of the potential acquisition. Key performance indicators (KPIs) and financial statements are under rigorous scrutiny.'",
+                "Giải thích ý nghĩa và tìm câu thành ngữ tiếng Anh có nghĩa tương đương với câu 'Nước đến chân mới nhảy'."
+            ],
             "Reasoning & Logic": [
                 "Có ba chiếc hộp. Một hộp chứa toàn bi đỏ, một hộp chứa toàn bi xanh, và một hộp chứa lẫn lộn cả bi đỏ và bi xanh. Cả ba hộp đều bị dán nhãn sai. Bạn chỉ được phép lấy ra một viên bi từ một hộp duy nhất (không được nhìn vào bên trong). Làm thế nào để xác định chính xác nội dung của cả ba hộp? Hãy giải thích quá trình suy luận của bạn.",
                 "Một nghiên cứu cho thấy những thành phố có nhiều cửa hàng kem nhất cũng có tỷ lệ tội phạm cao nhất. Có phải ăn kem gây ra tội phạm không? Hãy giải thích về mối tương quan và quan hệ nhân quả (correlation vs. causation) trong trường hợp này."
+            ],
+            "Technical Explanation": [
+                "Hãy giải thích cho một người không rành về công nghệ về khái niệm 'Điện toán đám mây' (Cloud Computing) là gì. Sử dụng ví dụ về Google Drive hoặc iCloud để minh họa.",
+                "Giải thích một cách đơn giản quá trình quang hợp ở thực vật diễn ra như thế nào và tại sao nó lại quan trọng đối với sự sống trên Trái Đất."
             ]
         }
 
@@ -420,13 +431,19 @@ class EnhancedBenchmarkSuite:
 
         # === Tổng hợp kết quả ===
         overall_tps = [r['avg_tokens_per_second'] for r in benchmark_results]
+        memory_info = self.get_memory_usage()
+        
         overall_stats = {
             'avg_token_speed': round(np.mean(overall_tps), 2) if overall_tps else 0,
             'mmlu_accuracy': mmlu_results['overall_accuracy'],
-            'avg_perplexity': perplexity_results['average_perplexity']
+            'avg_perplexity': perplexity_results['average_perplexity'],
+            'model_precision': self.model_precision,
+            'peak_vram_allocated_gb': round(memory_info['gpu_allocated_gb'], 2),
+            'peak_vram_reserved_gb': round(memory_info['gpu_reserved_gb'], 2)
         }
         
         return {
+            'model_type': 'original_no_quantization',
             'model_hash': self.model_hash,
             'timestamp': datetime.now().isoformat(),
             'overall_stats': overall_stats,
@@ -438,11 +455,14 @@ class EnhancedBenchmarkSuite:
     def save_and_print_summary(self, results: Dict):
         """Lưu và in kết quả benchmark."""
         stats = results['overall_stats']
-        print("\n" + "="*80 + "\n📊 EWQ MODEL ENHANCED BENCHMARK RESULTS SUMMARY\n" + "="*80)
-        print(f"🎯 Model Hash: {results['model_hash']}")
+        print("\n" + "="*80 + "\n📊 ORIGINAL MODEL BENCHMARK RESULTS SUMMARY\n" + "="*80)
+        print(f"🎯 Model Type: Original (No Quantization)")
+        print(f"🔑 Model Hash: {results['model_hash']}")
+        print(f"🎭 Model Precision: {stats['model_precision']}")
         print(f"📈 Average Token Speed (Overall): {stats['avg_token_speed']:.2f} tokens/sec")
         print(f"🧠 MMLU Accuracy: {stats['mmlu_accuracy']:.2f}%")
         print(f"📊 Average Perplexity: {stats['avg_perplexity']:.4f}")
+        print(f"💾 Peak VRAM Usage: {stats['peak_vram_allocated_gb']:.2f} GB (Reserved: {stats['peak_vram_reserved_gb']:.2f} GB)")
         
         print("\n🧪 Academic Test Results:")
         print(f"  📚 MMLU: {results['mmlu_results']['total_correct']}/{results['mmlu_results']['total_questions']} correct ({stats['mmlu_accuracy']:.2f}%)")
@@ -455,11 +475,11 @@ class EnhancedBenchmarkSuite:
         
         print("\n📋 Generation Task Performance:")
         for result in results['benchmark_results']:
-            vram = result['tests'][0]['vram_usage_gb'] if result['tests'] else 'N/A'
+            vram = result['tests'][0]['vram_allocated_gb'] if result['tests'] else 'N/A'
             print(f"  - {result['task']:<25}: {result['avg_tokens_per_second']:.2f} tok/s @ {vram} GB VRAM")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"ewq_enhanced_benchmark_{self.model_hash}_{timestamp}.json"
+        filename = f"original_model_benchmark_{self.model_hash}_{timestamp}.json"
         filepath = Path("benchmark_results") / filename
         filepath.parent.mkdir(parents=True, exist_ok=True)
         
@@ -467,38 +487,63 @@ class EnhancedBenchmarkSuite:
             json.dump(results, f, indent=2, ensure_ascii=False)
         print(f"\n💾 Full detailed results saved to: {filepath}")
 
-# === HÀM MAIN ĐỂ CHẠY ENHANCED BENCHMARK ===
+# === HÀM MAIN ĐỂ CHẠY ORIGINAL MODEL BENCHMARK ===
 def main():
-    print("🔍 EWQ Model Enhanced Benchmark System (v5 - with MMLU & Perplexity)")
+    print("🔍 Original Model Benchmark System (No EWQ Quantization)")
     print("=" * 80)
     
     try:
-        model_config = {'base_model': MODEL_ID, 'entropy_factor': ENTROPY_THRESHOLD_FACTOR, 'quant_method': 'ewq-bitsandbytes'}
-        model_hash = get_model_hash(MODEL_ID, model_config)
-        print(f"🔑 Model Config Hash: {model_hash}")
+        model_hash = get_model_hash(MODEL_ID)
+        print(f"🔑 Model ID: {MODEL_ID}")
+        print(f"🔑 Model Hash: {model_hash}")
         
-        if not check_quantized_model_exists(model_hash):
-            print(f"❌ Error: Quantization plan not found for hash '{model_hash}'.")
-            print("💡 Please run the 'main_cache_model.py' (plan generator) script first.")
-            return
-        
-        print("✅ Found quantization plan. Proceeding to load and quantize model.")
-        model, tokenizer = load_quantized_model(MODEL_ID, model_hash)
+        model, tokenizer = load_original_model(MODEL_ID)
         
         if model is None or tokenizer is None:
-            print("❌ Failed to load and quantize model!"); return
+            print("❌ Failed to load original model!")
+            return
         
-        print("✅ Quantized model is on GPU and ready for enhanced benchmarking!")
+        print("✅ Original model loaded and ready for benchmarking!")
         
-        benchmark_suite = EnhancedBenchmarkSuite(model, tokenizer, model_hash)
+        # Khởi tạo benchmark suite
+        benchmark_suite = OriginalModelBenchmarkSuite(model, tokenizer, model_hash)
+        
+        # Chạy toàn bộ benchmark
+        start_time = time.time()
         results = benchmark_suite.run_full_benchmark()
+        total_time = time.time() - start_time
+        
+        # Thêm thông tin thời gian tổng thể
+        results['total_benchmark_time'] = round(total_time, 2)
+        
+        # Lưu và in kết quả
         benchmark_suite.save_and_print_summary(results)
         
-        print(f"\n🎊 Enhanced benchmark completed successfully!")
+        print(f"\n⏱️ Total benchmark time: {total_time:.2f} seconds")
+        print("\n🎉 Original model benchmark completed successfully!")
+        
+        # Dọn dẹp bộ nhớ
+        del model
+        del tokenizer
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
+    except KeyboardInterrupt:
+        print("\n⚠️ Benchmark interrupted by user.")
         
     except Exception as e:
-        print(f"❌ An unexpected error occurred during benchmark: {e}")
-        import traceback; traceback.print_exc()
+        print(f"\n❌ Error during benchmark: {e}")
+        import traceback
+        traceback.print_exc()
+        
+    finally:
+        # Dọn dẹp cuối cùng
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        print("\n🧹 Memory cleanup completed.")
+
 
 if __name__ == "__main__":
     main()
