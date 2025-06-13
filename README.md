@@ -202,8 +202,9 @@ To reproduce these results:
 
 To watch VRAM consumption live while the benchmark scripts are running, you can open a second terminal window and execute the following command:
 
-```bash
-nvidia-smi -l 1```
+  ```bash
+  watch -n 1 nvidia-smi
+  ```
 
 This command refreshes the GPU stats every second. Pay attention to the **`Memory-Usage`** column. This way, you can see the VRAM difference firsthand when running `benchmark_original.py` (high VRAM) versus `benchmark.py` (significantly lower VRAM).
 ---
