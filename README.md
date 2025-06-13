@@ -95,7 +95,7 @@ Hệ thống được chia thành 3 kịch bản chính để đảm bảo tính
 
 ## 🔮 Hướng phát triển trong tương lai
 
-*   Đánh giá chất lượng đầu ra của mô hình (เช่น bằng BLEU, ROUGE) để đảm bảo không bị suy giảm hiệu suất.
+*   Đánh giá chất lượng đầu ra của mô hình (bằng BLEU, ROUGE) để đảm bảo không bị suy giảm hiệu suất.
 *   Thử nghiệm với các mô hình và kiến trúc khác nhau.
 *   Tinh chỉnh thuật toán xác định ngưỡng entropy để tối ưu hơn nữa.
 
