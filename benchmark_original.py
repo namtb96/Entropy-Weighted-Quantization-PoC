@@ -120,27 +120,16 @@ def load_original_model(model_id: str) -> Tuple[Optional[nn.Module], Optional[Au
     """Tải model gốc với precision cao nhất có thể."""
     print("  📥 Loading original model to GPU...")
     
-    # Kiểm tra VRAM available
-    if torch.cuda.is_available():
-        total_vram = torch.cuda.get_device_properties(0).total_memory / 1024**3
-        print(f"  💾 Available VRAM: {total_vram:.2f} GB")
-        
-        # Chọn precision dựa trên VRAM
-        if total_vram >= 16:
-            torch_dtype = torch.float32
-            print("  🎯 Using float32 precision (highest quality)")
-        elif total_vram >= 12:
-            torch_dtype = torch.float16
-            print("  🎯 Using float16 precision (balanced)")
-        else:
-            torch_dtype = torch.float16
-            print("  ⚠️ Using float16 precision (limited VRAM)")
-            
-        device_map = "auto"
-    else:
+    if not torch.cuda.is_available():
         print("  ⚠️ WARNING: No CUDA device found. Model will run on CPU.")
+        # Trên CPU, float32 vẫn là lựa chọn hợp lý
         torch_dtype = torch.float32
         device_map = "cpu"
+    else:
+        # Luôn sử dụng bfloat16 trên GPU cho các model lớn.
+        torch_dtype = torch.bfloat16
+        device_map = "auto"
+        print(f"  🎯 Using bfloat16 precision for optimal GPU performance.")
     
     try:
         model = AutoModelForCausalLM.from_pretrained(
