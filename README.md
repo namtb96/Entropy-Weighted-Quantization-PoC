@@ -78,6 +78,18 @@ Hệ thống được chia thành 3 kịch bản chính để đảm bảo tính
 5.  **Kiểm tra kết quả:**
     Tất cả các file JSON chứa kết quả chi tiết sẽ được lưu trong thư mục `benchmark_results`.
 
+### 📈 Lưu ý: Theo dõi Hiệu năng (VRAM & Tốc độ)
+
+  Hệ thống benchmark được thiết kế để không chỉ đo tốc độ sinh token (tokens/giây) mà còn **chủ động theo dõi mức tiêu thụ VRAM** của GPU trong suốt quá trình chạy.
+
+  Trong mỗi file kết quả JSON, bạn sẽ tìm thấy trường `vram_usage_gb` cho từng bài test. Điều này cho phép bạn đánh giá chính xác mức độ hiệu quả về bộ nhớ của phương pháp EWQ so với mô hình gốc, cung cấp một cái nhìn toàn diện về hiệu năng hệ thống.
+
+  Để quan sát trực tiếp mức tiêu thụ VRAM trong khi các script benchmark đang chạy, bạn có thể mở một cửa sổ terminal thứ hai và thực thi lệnh sau:
+
+  ```bash
+  watch -n 1 nvidia-smi
+  ```
+
 ## 📁 Cấu trúc thư mục
     .
     ├── benchmark.py # Script benchmark mô hình EWQ
