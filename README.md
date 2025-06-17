@@ -1,3 +1,6 @@
+*This document is also available in [English](./README.en.md).*
+
+---
 # Lượng tử hóa Trọng số dựa trên Entropy (EWQ) cho Mô hình Ngôn ngữ Lớn
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
@@ -115,3 +118,127 @@ python benchmark_gguf_q4.py
 python benchmark_gguf_q8.py
 ```
 Kết quả của mỗi lần chạy sẽ được lưu dưới dạng file .json trong thư mục benchmark_results.
+
+---
+
+---
+
+# Entropy-based Weight Quantization (EWQ) for Large Language Models
+
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![arXiv](https://img.shields.io/badge/arXiv-2503.04704v2-b31b1b.svg)](https://arxiv.org/html/2503.04704v2)
+
+## 1. Introduction
+
+This project is an implementation and in-depth benchmark of the **Entropy-based Weight Quantization (EWQ)** method, inspired by the concept proposed in the scientific paper [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2).
+
+**The Core Idea**: Not all layers in a Large Language Model (LLM) are equally important. The hypothesis is that layers with **low information entropy** (i.e., more predictable weight distributions) can be quantized more aggressively (e.g., to 4-bit) with minimal impact on quality. Conversely, layers with **high entropy** (containing more complex and critical information) should be kept at a higher precision (8-bit or full precision) to preserve the model's performance.
+
+This project includes:
+1.  A script to analyze the entropy of any Transformer-based model and **generate a custom quantization plan**.
+2.  A mechanism to apply this plan, creating a mixed-precision quantized model using `bitsandbytes`.
+3.  A **comprehensive benchmark suite** to quantitatively evaluate the effectiveness of the EWQ method against the base model (FP16) and industry-standard quantization methods like GGUF.
+
+## 2. How It Works
+
+The process is divided into three main steps, automated by scripts:
+
+### Step 1: Entropy Analysis & Plan Generation (`create_quantization_plan.py`)
+- The script loads the base model onto the CPU (to conserve VRAM).
+- It iterates through each block (or layer) of the model and calculates the average entropy of its weights.
+- Based on the entropy distribution across all blocks, the script computes the mean and standard deviation (`std`).
+- A quantization plan (`.json`) is generated based on the `ENTROPY_THRESHOLD_FACTOR` hyperparameter:
+    - **`entropy >= mean`**: A critical layer, kept at its original precision (`raw`).
+    - **`mean > entropy >= mean - factor * std`**: A quantizable layer, using `8-bit`.
+    - **`entropy < mean - factor * std`**: A less sensitive layer, using `4-bit`.
+
+### Step 2: Plan-based Quantization (`benchmark_ewq.py`)
+- This script reads the generated `.json` plan file.
+- It loads the base model onto the CPU, then applies the quantization plan by replacing the corresponding `nn.Linear` layers with `bitsandbytes`' `bnb.Linear8bitLt` or `bnb.Linear4bit`.
+- Finally, the mixed-precision quantized model is deployed to the GPU for benchmarking.
+
+### Step 3: Comprehensive Benchmarking (`suite.py`, `tasks.py`, ...)
+- A robust benchmark suite is used to evaluate models across multiple dimensions:
+    - **Reasoning & Knowledge**: MMLU score.
+    - **Fluency & Language Coherence**: Perplexity score across various domains (literature, science, code, etc.).
+    - **Performance**: Token generation speed (tokens/sec) and VRAM usage (GB).
+- The results are compared against the base model and GGUF versions (Q4 & Q8) for a holistic view.
+
+## 3. Detailed Results Analysis
+
+We performed benchmarks on the `Qwen/Qwen3-8B` model with various `ENTROPY_THRESHOLD_FACTOR` values. Below is a summary of the comparison.
+
+| Model Version | VRAM (GB) | Speed (tok/s) | MMLU (%) | Perplexity |
+| :--- | :---: | :---: | :---: | :---: |
+| Base (FP16) | 15.26 | 47.02 | 69.98 | 26.88 |
+| EWQ (Factor 1.0) | 12.05 | 45.91 | 69.45 | 34.70 |
+| EWQ (Factor 0.8) | 11.79 | 45.59 | 69.58 | **30.22** |
+| **EWQ (Factor 0.5-0.65)** | **11.53** | **~49.0** | **70.50** | ~31.01 |
+| GGUF Q4_K_M | **5.59** | **124.47** | 69.32 | 30.07 |
+| **GGUF Q8_0** | 8.73 | 86.55 | 70.27 | **26.07** |
+
+*(**Bold**: Best value in the column, or the most notable result)*
+
+### Key Findings:
+1.  **Successful Resource Reduction**: All EWQ versions significantly reduce VRAM usage (by ~25%) compared to the base model.
+2.  **Superior MMLU Performance**: The most surprising finding is that EWQ versions with a low `factor` (0.5 - 0.65) not only preserve but **surpass the MMLU score of both the base model and GGUF Q8**. This suggests that selective quantization can act as a form of regularization, forcing the model to focus on more critical reasoning features.
+3.  **GGUF's Speed Advantage**: The superior speed of the GGUF versions comes from the low-level optimized `llama.cpp` (C++) engine. The EWQ tests, running on the `transformers` (Python) framework, are not directly comparable in this regard. Notably, the EWQ versions showed a slight inference speed-up over the base model.
+4.  **The MMLU vs. Perplexity Trade-off**: An interesting trade-off was discovered:
+    - **`Factor = 0.8`** yielded the best Perplexity score (30.22), making it the optimal choice for **generating smooth, natural text**.
+    - **`Factor = 0.5-0.65`** achieved the highest MMLU score (70.50%), making it the optimal choice for **accurate reasoning and question-answering** tasks.
+
+## 4. Evaluation
+
+### Strengths
+*   **Superior Reasoning Quality**: EWQ has proven its ability to produce a model that is "smarter" than the original in terms of MMLU score.
+*   **Memory Efficiency**: A ~25% reduction in VRAM is a significant achievement, enabling larger models to run on consumer-grade GPUs.
+*   **Highly Tunable**: The `ENTROPY_THRESHOLD_FACTOR` hyperparameter acts as a powerful knob, allowing users to customize the trade-off between reasoning quality and language fluency to fit their specific application.
+*   **Broad Applicability**: This method can be applied to any model within the Hugging Face Transformers ecosystem.
+
+### Weaknesses & Trade-offs
+*   **Inference Speed**: Being based on a Python framework, the speed cannot compete with C++ optimized engines like `llama.cpp`.
+*   **Quality Trade-off**: Users must decide whether to prioritize reasoning ability (MMLU) or natural language generation (Perplexity) to select the appropriate `factor`.
+
+## 5. Future Directions
+1.  **In-depth Analysis of Quantization Plans**: Compare the `quant_plan.json` files generated by different `factor` values to identify exactly which layers are having their precision levels changed. This will help to better understand the cause of the MMLU/Perplexity trade-off.
+2.  **Packaging EWQ into GGUF Format**: This is the ambitious ultimate goal. By modifying the `convert.py` script from `llama.cpp` to read and apply our `quant_plan.json`, we could create a custom `.gguf` file. This would combine the intelligent quantization strategy of EWQ with the blazing-fast inference speed of `llama.cpp`.
+3.  **Testing on Other Architectures**: Apply the EWQ method to other model families (e.g., Llama, Mistral, Gemma) to test whether these findings are universal.
+
+## 6. Usage Guide
+
+### Step 1: Environment Setup
+```bash
+git clone https://github.com/namtb96/Entropy-Weighted-Quantization-PoC
+cd Entropy-Weighted-Quantization-PoC
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+pip install -r requirements.txt
+```
+
+### Step 2: Generate Quantization Plan
+Run the script to analyze the model and generate a plan. Modify `MODEL_ID` and `ENTROPY_THRESHOLD_FACTOR` in the script if necessary.
+```bash
+python create_quantization_plan.py
+```
+This will create a quant_plan_xxxxxxxx.json file in the quantized_models directory.
+
+### Step 3: Run the Benchmarks
+You can run the benchmark tests for each version:
+a. Run the benchmark for the EWQ version:
+(The script will automatically find the plan file based on the configuration)
+```bash
+python benchmark_ewq.py
+```
+
+b. Run the benchmark for the original (FP16) version:
+```bash
+python benchmark_original.py
+```
+
+c. Run the benchmark for GGUF versions:
+(Modify MODEL_REPO_ID and MODEL_FILE in the scripts accordingly)
+```bash
+python benchmark_gguf_q4.py
+python benchmark_gguf_q8.py
+```
+The results of each run will be saved as a .json file in the benchmark_results directory
