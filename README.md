@@ -1,4 +1,4 @@
-*This document is also available in [English](./README.en.md).*
+### 🇬🇧 English version is available below.
 
 ---
 # Lượng tử hóa Trọng số dựa trên Entropy (EWQ) cho Mô hình Ngôn ngữ Lớn
