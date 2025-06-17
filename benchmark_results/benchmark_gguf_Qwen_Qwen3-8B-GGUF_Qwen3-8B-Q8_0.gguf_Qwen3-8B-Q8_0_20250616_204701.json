@@ -1,0 +1,512 @@
+{
+  "model_hash": "cf5e4fa478e9d7cb",
+  "timestamp": "2025-06-16T20:47:01.700111",
+  "overall_stats": {
+    "avg_token_speed": 86.550625,
+    "mmlu_accuracy": 70.27,
+    "avg_perplexity": 26.070100784301758,
+    "vram_usage_gb": 8.7265625
+  },
+  "mmlu_results": {
+    "task": "MMLU Test",
+    "overall_accuracy": 70.27,
+    "total_correct": 9868,
+    "total_questions": 14042,
+    "subject_results": {
+      "abstract_algebra": {
+        "correct": 51,
+        "total": 100,
+        "accuracy": 51.0
+      },
+      "anatomy": {
+        "correct": 94,
+        "total": 135,
+        "accuracy": 69.63
+      },
+      "astronomy": {
+        "correct": 132,
+        "total": 152,
+        "accuracy": 86.84
+      },
+      "business_ethics": {
+        "correct": 76,
+        "total": 100,
+        "accuracy": 76.0
+      },
+      "clinical_knowledge": {
+        "correct": 206,
+        "total": 265,
+        "accuracy": 77.74
+      },
+      "college_biology": {
+        "correct": 120,
+        "total": 144,
+        "accuracy": 83.33
+      },
+      "college_chemistry": {
+        "correct": 52,
+        "total": 100,
+        "accuracy": 52.0
+      },
+      "college_computer_science": {
+        "correct": 69,
+        "total": 100,
+        "accuracy": 69.0
+      },
+      "college_mathematics": {
+        "correct": 50,
+        "total": 100,
+        "accuracy": 50.0
+      },
+      "college_medicine": {
+        "correct": 130,
+        "total": 173,
+        "accuracy": 75.14
+      },
+      "college_physics": {
+        "correct": 54,
+        "total": 102,
+        "accuracy": 52.94
+      },
+      "computer_security": {
+        "correct": 83,
+        "total": 100,
+        "accuracy": 83.0
+      },
+      "conceptual_physics": {
+        "correct": 180,
+        "total": 235,
+        "accuracy": 76.6
+      },
+      "econometrics": {
+        "correct": 69,
+        "total": 114,
+        "accuracy": 60.53
+      },
+      "electrical_engineering": {
+        "correct": 39,
+        "total": 145,
+        "accuracy": 26.9
+      },
+      "elementary_mathematics": {
+        "correct": 249,
+        "total": 378,
+        "accuracy": 65.87
+      },
+      "formal_logic": {
+        "correct": 62,
+        "total": 126,
+        "accuracy": 49.21
+      },
+      "global_facts": {
+        "correct": 38,
+        "total": 100,
+        "accuracy": 38.0
+      },
+      "high_school_biology": {
+        "correct": 275,
+        "total": 310,
+        "accuracy": 88.71
+      },
+      "high_school_chemistry": {
+        "correct": 148,
+        "total": 203,
+        "accuracy": 72.91
+      },
+      "high_school_computer_science": {
+        "correct": 84,
+        "total": 100,
+        "accuracy": 84.0
+      },
+      "high_school_european_history": {
+        "correct": 140,
+        "total": 165,
+        "accuracy": 84.85
+      },
+      "high_school_geography": {
+        "correct": 170,
+        "total": 198,
+        "accuracy": 85.86
+      },
+      "high_school_government_and_politics": {
+        "correct": 175,
+        "total": 193,
+        "accuracy": 90.67
+      },
+      "high_school_macroeconomics": {
+        "correct": 292,
+        "total": 390,
+        "accuracy": 74.87
+      },
+      "high_school_mathematics": {
+        "correct": 125,
+        "total": 270,
+        "accuracy": 46.3
+      },
+      "high_school_microeconomics": {
+        "correct": 213,
+        "total": 238,
+        "accuracy": 89.5
+      },
+      "high_school_physics": {
+        "correct": 106,
+        "total": 151,
+        "accuracy": 70.2
+      },
+      "high_school_psychology": {
+        "correct": 485,
+        "total": 545,
+        "accuracy": 88.99
+      },
+      "high_school_statistics": {
+        "correct": 156,
+        "total": 216,
+        "accuracy": 72.22
+      },
+      "high_school_us_history": {
+        "correct": 177,
+        "total": 204,
+        "accuracy": 86.76
+      },
+      "high_school_world_history": {
+        "correct": 206,
+        "total": 237,
+        "accuracy": 86.92
+      },
+      "human_aging": {
+        "correct": 158,
+        "total": 223,
+        "accuracy": 70.85
+      },
+      "human_sexuality": {
+        "correct": 104,
+        "total": 131,
+        "accuracy": 79.39
+      },
+      "international_law": {
+        "correct": 94,
+        "total": 121,
+        "accuracy": 77.69
+      },
+      "jurisprudence": {
+        "correct": 87,
+        "total": 108,
+        "accuracy": 80.56
+      },
+      "logical_fallacies": {
+        "correct": 138,
+        "total": 163,
+        "accuracy": 84.66
+      },
+      "machine_learning": {
+        "correct": 64,
+        "total": 112,
+        "accuracy": 57.14
+      },
+      "management": {
+        "correct": 90,
+        "total": 103,
+        "accuracy": 87.38
+      },
+      "marketing": {
+        "correct": 216,
+        "total": 234,
+        "accuracy": 92.31
+      },
+      "medical_genetics": {
+        "correct": 85,
+        "total": 100,
+        "accuracy": 85.0
+      },
+      "miscellaneous": {
+        "correct": 659,
+        "total": 783,
+        "accuracy": 84.16
+      },
+      "moral_disputes": {
+        "correct": 246,
+        "total": 346,
+        "accuracy": 71.1
+      },
+      "moral_scenarios": {
+        "correct": 362,
+        "total": 895,
+        "accuracy": 40.45
+      },
+      "nutrition": {
+        "correct": 232,
+        "total": 306,
+        "accuracy": 75.82
+      },
+      "philosophy": {
+        "correct": 220,
+        "total": 311,
+        "accuracy": 70.74
+      },
+      "prehistory": {
+        "correct": 258,
+        "total": 324,
+        "accuracy": 79.63
+      },
+      "professional_accounting": {
+        "correct": 159,
+        "total": 282,
+        "accuracy": 56.38
+      },
+      "professional_law": {
+        "correct": 784,
+        "total": 1534,
+        "accuracy": 51.11
+      },
+      "professional_medicine": {
+        "correct": 221,
+        "total": 272,
+        "accuracy": 81.25
+      },
+      "professional_psychology": {
+        "correct": 446,
+        "total": 612,
+        "accuracy": 72.88
+      },
+      "public_relations": {
+        "correct": 71,
+        "total": 110,
+        "accuracy": 64.55
+      },
+      "security_studies": {
+        "correct": 183,
+        "total": 245,
+        "accuracy": 74.69
+      },
+      "sociology": {
+        "correct": 168,
+        "total": 201,
+        "accuracy": 83.58
+      },
+      "us_foreign_policy": {
+        "correct": 86,
+        "total": 100,
+        "accuracy": 86.0
+      },
+      "virology": {
+        "correct": 87,
+        "total": 166,
+        "accuracy": 52.41
+      },
+      "world_religions": {
+        "correct": 144,
+        "total": 171,
+        "accuracy": 84.21
+      }
+    }
+  },
+  "perplexity_results": {
+    "task": "Perplexity Test",
+    "overall_average_perplexity": 26.070100784301758,
+    "category_results": {
+      "general_knowledge": {
+        "average_perplexity": 4.612299919128418,
+        "num_passages": 8
+      },
+      "scientific_technical": {
+        "average_perplexity": 3.448899984359741,
+        "num_passages": 5
+      },
+      "literary_figurative": {
+        "average_perplexity": 3.8378000259399414,
+        "num_passages": 5
+      },
+      "conversational_informal": {
+        "average_perplexity": 11.941100120544434,
+        "num_passages": 5
+      },
+      "code_python": {
+        "average_perplexity": 2.355600118637085,
+        "num_passages": 5
+      },
+      "adversarial_nonsense": {
+        "average_perplexity": 109.66259765625,
+        "num_passages": 7
+      }
+    }
+  },
+  "generation_results": [
+    {
+      "task": "Code Generation",
+      "avg_tokens_per_second": 86.39500000000001,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nViết một script Python sử dụng thư viện Pandas để đọc file CSV có tên `sales_data.csv` với các cột 'Date', 'Product', 'Revenue'. Script cần tính tổng doanh thu theo từng sản phẩm và xuất kết quả ra một file CSV mới có tên `revenue_by_product.csv`.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\n```python\nimport pandas as pd\n\n# Đọc dữ liệu từ file CSV\ndf = pd.read_csv('sales_data.csv')\n\n# Tính tổng doanh thu theo từng sản phẩm\nrevenue_by_product = df.groupby('Product')['Revenue'].sum().reset_index()\n\n# Xuất kết quả ra file CSV mới\nrevenue_by_product.to_csv('revenue_by_product.csv', index=False)\n```",
+          "generation_time": 1.03,
+          "tokens_generated": 88,
+          "tokens_per_second": 85.68,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nTạo một component React functional bằng TypeScript tên là `UserProfile`. Component này nhận vào props là `name` (string), `age` (number), và `avatarUrl` (string), sau đó hiển thị thông tin này một cách có cấu trúc.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\n```tsx\nimport React from 'react';\n\ninterface UserProfileProps {\n  name: string;\n  age: number;\n  avatarUrl: string;\n}\n\nconst UserProfile: React.FC<UserProfileProps> = ({ name, age, avatarUrl }) => {\n  return (\n    <div style={{ textAlign: 'center', margin: '20px' }}>\n      <img src={avatarUrl} alt=\"Avatar\" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />\n      <h2>{name}</h2>\n      <p>Age: {age}</p>\n    </div>\n  );\n};\n\nexport default UserProfile;\n```",
+          "generation_time": 1.68,
+          "tokens_generated": 146,
+          "tokens_per_second": 87.11,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Math Problem Solving",
+      "avg_tokens_per_second": 86.505,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nMột bể nước có hai vòi. Vòi thứ nhất chảy một mình thì đầy bể trong 4 giờ. Vòi thứ hai chảy một mình thì đầy bể trong 6 giờ. Nếu mở cả hai vòi cùng một lúc khi bể cạn, hỏi sau bao lâu thì bể sẽ đầy? Trình bày các bước giải chi tiết.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐể giải bài toán này, ta thực hiện các bước sau:\n\n1. **Xác định năng suất của từng vòi:**\n\n   - Vòi thứ nhất chảy đầy bể trong 4 giờ, nên mỗi giờ chảy được:  \n     $$\n     \\frac{1}{4} \\text{ bể}\n     $$\n\n   - Vòi thứ hai chảy đầy bể trong 6 giờ, nên mỗi giờ chảy được:  \n     $$\n     \\frac{1}{6} \\text{ bể}\n     $$\n\n2. **Tính tổng năng suất khi cả hai vòi cùng chảy:**\n\n   $$\n   \\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12} \\text{ bể/giờ}\n   $$\n\n3. **Tính thời gian để đầy bể:**\n\n   - Tổng năng suất là $\\frac{5}{12}$ bể/giờ, nên thời gian để đầy bể là:  \n     $$\n     \\frac{1}{\\frac{5}{12}} = \\frac{12}{5} = 2.4 \\text{ giờ}\n     $$\n\n**Kết luận:** Sau $2.4$ giờ (tức là $2$ giờ $24$ phút), bể sẽ đầy.",
+          "generation_time": 3.59,
+          "tokens_generated": 310,
+          "tokens_per_second": 86.27,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nMột người gửi tiết kiệm 500 triệu đồng với lãi suất kép 6.5% mỗi năm. Hỏi sau 5 năm, người đó sẽ nhận được cả vốn lẫn lãi là bao nhiêu tiền? Yêu cầu trình bày công thức và các bước tính toán.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nCông thức tính lãi kép là:  \n$$ A = P(1 + r)^t $$  \n\nTrong đó:  \n- $ A $: Số tiền nhận được sau thời gian $ t $ (vốn + lãi)  \n- $ P $: Số tiền gửi ban đầu (vốn)  \n- $ r $: Lãi suất hàng năm (dưới dạng thập phân)  \n- $ t $: Số năm  \n\nÁp dụng vào bài toán:  \n- $ P = 500 $ triệu đồng  \n- $ r = 6.5\\% = 0.065 $  \n- $ t = 5 $ năm  \n\nTính toán:  \n$$ A = 500(1 + 0.065)^5 $$  \n$$ A = 500(1.065)^5 $$  \n\nTính $ (1.065)^5 $:  \n$$ (1.065)^5 \\approx 1.370086 $$  \n\nVậy:  \n$$ A \\approx 500 \\times 1.370086 = 685.043 \\text{ triệu đồng} $$  \n\nKết quả: Sau 5 năm, người đó sẽ nhận được khoảng **685.04 triệu đồng**.",
+          "generation_time": 3.31,
+          "tokens_generated": 287,
+          "tokens_per_second": 86.74,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Text Summarization",
+      "avg_tokens_per_second": 86.32,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nHãy tóm tắt đoạn văn sau thành 3 ý chính: 'Các công nghệ thu giữ carbon (Carbon Capture Technologies) đang nổi lên như một giải pháp tiềm năng trong cuộc chiến chống biến đổi khí hậu. Các phương pháp chính bao gồm thu giữ sau đốt cháy, thu giữ trước đốt cháy và thu giữ từ không khí trực tiếp (DAC). Mặc dù có tiềm năng lớn, công nghệ này vẫn đối mặt với những thách thức về chi phí vận hành cao, hiệu quả năng lượng và vấn đề lưu trữ carbon an toàn trong dài hạn. Các chính phủ và tập đoàn lớn đang đầu tư hàng tỷ USD vào R&D để cải thiện hiệu quả và giảm giá thành, hy vọng biến nó thành một công cụ chủ chốt vào năm 2050.'<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\nOkay, let's tackle this request. The user wants me to summarize a Vietnamese paragraph into three main points. First, I need to read the original text carefully to understand the key ideas. The paragraph talks about carbon capture technologies as a potential solution to climate change, mentions the three main methods: post-combustion, pre-combustion, and DAC. Then it discusses the challenges like high costs, energy efficiency, and safe long-term storage. Finally, it notes that governments and big companies are investing in R&D to improve these technologies, aiming to make them a key tool by 2050.\n\nNow, I need to condense this into three concise points. The first point should be about the technologies and their role in combating climate change. The second point would cover the challenges they face. The third point is about the investments and future goals. I have to make sure each point is clear and captures the essence without extra details. Let me check the original text again to ensure I didn't miss anything. Yep, that's all covered. Now, translate these points into Vietnamese, keeping them brief and to the point. Avoid any markdown and just present the three points clearly.\n</think>\n\n1. Công nghệ thu giữ carbon (CCC) được xem là giải pháp tiềm năng trong cuộc chiến chống biến đổi khí hậu, với ba phương pháp chính: thu giữ sau đốt cháy, trước đốt cháy và DAC.  \n2. CCC đối mặt với thách thức về chi phí cao, hiệu quả năng lượng thấp và vấn đề lưu trữ carbon an toàn lâu dài.  \n3. Các chính phủ và tập đoàn đang đầu tư mạnh vào R&D để cải thiện công nghệ, hướng tới mục tiêu đưa CCC trở thành công cụ chủ chốt vào năm 2050.",
+          "generation_time": 4.29,
+          "tokens_generated": 367,
+          "tokens_per_second": 85.53,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nTóm tắt ngắn gọn những sự kiện chính và ý nghĩa lịch sử của cuộc Cách mạng Công nghiệp lần thứ nhất, tập trung vào các phát minh quan trọng và tác động của nó đến xã hội.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nCuộc Cách mạng Công nghiệp lần thứ nhất (khoảng 1760 - 1840) đã thay đổi căn bản nền kinh tế và xã hội. Các phát minh quan trọng bao gồm máy hơi nước của James Watt, máy dệt tự động (Spinning Jenny và Power Loom), và phương tiện giao thông như xe lửa và tàu thủy. Sự kiện này đánh dấu sự chuyển đổi từ nền kinh tế nông nghiệp sang công nghiệp, thúc đẩy sản xuất hàng loạt, tạo ra ngành công nghiệp mới và làm thay đổi cấu trúc xã hội, dẫn đến sự phát triển của lớp công nhân và đô thị hóa.",
+          "generation_time": 1.64,
+          "tokens_generated": 143,
+          "tokens_per_second": 87.11,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Creative Writing",
+      "avg_tokens_per_second": 86.485,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nViết đoạn mở đầu cho một câu chuyện ngắn thuộc thể loại khoa học viễn tưởng, trong đó nhân vật chính là một nhà thực vật học sống trên Sao Hỏa, người vừa phát hiện ra một loài cây có khả năng giao tiếp bằng ánh sáng.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nTrên bề mặt đỏ thẫm của Sao Hỏa, nơi gió bụi thổi qua những dải cát vàng và những ngọn núi đá vôi, nhà thực vật học Dr. Linh Nguyễn đã tìm thấy điều mà cả nhân loại chưa từng mơ ước: một loài cây có khả năng giao tiếp bằng ánh sáng. Trong khi tất cả các sinh vật sống trên hành tinh này đều phải dựa vào tín hiệu hóa học, loài cây kỳ lạ này lại tỏa ra những xung động ánh sáng kỳ diệu, như một ngôn ngữ bí ẩn đang chờ đợi ai đó để giải mã.",
+          "generation_time": 1.59,
+          "tokens_generated": 138,
+          "tokens_per_second": 86.69,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nViết một bài văn ngắn (khoảng 150 từ) miêu tả cảnh một phiên chợ nổi trên sông Cửu Long vào buổi sáng sớm, tập trung vào âm thanh, màu sắc và mùi vị đặc trưng.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\nOkay, the user wants a short essay (around 150 words) describing a floating market on the Cửu Long River in the early morning, focusing on sound, color, and smell. Let me start by visualizing the scene. Early morning, so the sky is probably light, maybe a pinkish hue. The river is calm, with boats moving. Sounds would include the calls of vendors, maybe some music. Colors: the boats might be bright, with colorful fabrics, fruits. Smells could be fresh fruits, cooking food, maybe the river's scent.\n\nI need to make sure each sense is covered. Start with the sky and river, then the sounds of the market. Mention the colors of the boats and goods. Include the smells of food and the river. Keep it concise, around 150 words. Avoid complex sentences. Use vivid adjectives. Check for flow and that all elements are included. Let me put it all together now.\n</think>\n\nPhiên chợ nổi trên sông Cửu Long vào buổi sáng sớm như một bức tranh sống động. Ánh nắng vàng nhạt lấp ló qua mây, phản chiếu trên mặt nước lấp lánh. Tiếng trống, tiếng rao hàng vang lên rộn rã, hòa cùng tiếng cười nói của người bán, người mua. Những chiếc xuồng ba lá màu trắng, đỏ, xanh thắm chở đầy hoa quả, cá tươi, rau củ, tạo nên khung cảnh rực rỡ. Mùi thơm của trái cây chín mọng, mùi cá nướng thơm lừng và hơi nước sông trong lành hòa quyện. Tiếng sóng nước nhẹ nhàng, tiếng còi thuyền, tiếng chim hót ríu rít như bản giao hưởng của vùng sông nước. Không gian tràn đầy sức sống, ấm áp, mang đậm nét văn hóa truyền thống của miền Tây.",
+          "generation_time": 4.72,
+          "tokens_generated": 407,
+          "tokens_per_second": 86.28,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Question Answering",
+      "avg_tokens_per_second": 86.675,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nGiải thích sự khác biệt cơ bản giữa năng lượng hạt nhân phân hạch (nuclear fission) và tổng hợp hạt nhân (nuclear fusion). Loại nào hiện đang được sử dụng trong các nhà máy điện?<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nNăng lượng hạt nhân phân hạch là quá trình tách một hạt nhân nặng thành hai hạt nhân nhẹ hơn, giải phóng năng lượng. Trong khi đó, năng lượng hạt nhân tổng hợp là quá trình kết hợp các hạt nhân nhẹ thành một hạt nhân nặng hơn, cũng giải phóng năng lượng. Hiện nay, phân hạch được sử dụng trong các nhà máy điện hạt nhân.",
+          "generation_time": 0.97,
+          "tokens_generated": 84,
+          "tokens_per_second": 86.19,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nCon đường tơ lụa là gì và nó có vai trò quan trọng như thế nào đối với sự phát triển của các nền văn minh cổ đại?<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nCon đường tơ lụa là một mạng lưới thương mại cổ đại nối Trung Quốc với các vùng đất khác ở châu Á, Trung Đông và châu Âu, chủ yếu thông qua các tuyến đường bộ và đường thủy. Con đường này đóng vai trò quan trọng trong việc thúc đẩy trao đổi kinh tế, văn hóa, tôn giáo và công nghệ giữa các nền văn minh cổ đại, góp phần làm phong phú và phát triển các nền văn minh như Trung Quốc, Ấn Độ, Hy Lạp, La Mã và các quốc gia Arab.",
+          "generation_time": 1.4,
+          "tokens_generated": 122,
+          "tokens_per_second": 87.16,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Language Translation & Nuance",
+      "avg_tokens_per_second": 86.56,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nDịch đoạn văn sau sang tiếng Việt, chú ý giữ văn phong chuyên nghiệp: 'Our team is conducting a comprehensive due diligence process to assess the viability of the potential acquisition. Key performance indicators (KPIs) and financial statements are under rigorous scrutiny.'<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\nOkay, the user wants me to translate a paragraph into Vietnamese while maintaining a professional tone. Let me start by understanding the original text. The main points are that the team is doing comprehensive due diligence to assess the viability of a potential acquisition. They're looking at KPIs and financial statements under rigorous scrutiny.\n\nFirst, I need to make sure the translation is accurate. \"Comprehensive due diligence process\" should be \"quy trình kiểm toán kỹ lưỡng\" or maybe \"quy trình thẩm định toàn diện\". \"Assess the viability\" could be \"đánh giá tính khả thi\". \n\nNext, \"Key performance indicators (KPIs)\" is straightforward as \"Chỉ số hiệu suất chính (KPI)\". \"Financial statements\" is \"báo cáo tài chính\". \"Under rigorous scrutiny\" might be \"đang được kiểm tra kỹ lưỡng\" or \"đang được xem xét một cách nghiêm túc\".\n\nI should check for any industry-specific terms to ensure they're correctly translated. Also, maintaining a professional tone is crucial here. Maybe use \"đội ngũ của chúng tôi\" for \"Our team\" and \"đang tiến hành\" for \"is conducting\". \n\nPutting it all together: \"Đội ngũ của chúng tôi đang tiến hành quy trình thẩm định toàn diện để đánh giá tính khả thi của việc mua lại tiềm năng. Các chỉ số hiệu suất chính (KPI) và báo cáo tài chính đang được kiểm tra kỹ lưỡng.\" \n\nWait, \"potential acquisition\" is \"việc mua lại tiềm năng\" or maybe \"sự mua lại tiềm năng\". I think \"việc mua lại tiềm năng\" sounds better. Also, \"rigorous scrutiny\" as \"kiểm tra kỹ lưỡng\" is appropriate. \n\nDouble-checking the structure to ensure it flows naturally in Vietnamese and maintains the original's professionalism. Looks good. That should be the final translation.\n</think>\n\nĐội ngũ của chúng tôi đang tiến hành quy trình thẩm định toàn diện để đánh giá tính khả thi của việc mua lại tiềm năng. Các chỉ số hiệu suất chính (KPI) và báo cáo tài chính đang được kiểm tra kỹ lưỡng.",
+          "generation_time": 5.19,
+          "tokens_generated": 447,
+          "tokens_per_second": 86.05,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nGiải thích ý nghĩa và tìm câu thành ngữ tiếng Anh có nghĩa tương đương với câu 'Nước đến chân mới nhảy'.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nÝ nghĩa của câu \"Nước đến chân mới nhảy\" là hành động chỉ xảy ra khi đã đến lúc không còn lùi bước được nữa, tức là đến lúc phải đối mặt với hậu quả hoặc tình huống khó khăn.  \n\nCâu thành ngữ tiếng Anh có nghĩa tương đương là: **\"When the cat's away, the mice will play.\"** (Khi mèo vắng nhà, chuột sẽ nghịch ngợm.)",
+          "generation_time": 1.15,
+          "tokens_generated": 100,
+          "tokens_per_second": 87.07,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Reasoning & Logic",
+      "avg_tokens_per_second": 86.41499999999999,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nCó ba chiếc hộp. Một hộp chứa toàn bi đỏ, một hộp chứa toàn bi xanh, và một hộp chứa lẫn lộn cả bi đỏ và bi xanh. Cả ba hộp đều bị dán nhãn sai. Bạn chỉ được phép lấy ra một viên bi từ một hộp duy nhất (không được nhìn vào bên trong). Làm thế nào để xác định chính xác nội dung của cả ba hộp? Hãy giải thích quá trình suy luận của bạn.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐầu tiên, bạn chọn hộp được dán nhãn \"lẫn lộn\". Vì tất cả các hộp đều bị dán nhãn sai, hộp này không thể chứa cả bi đỏ và bi xanh. Bạn lấy một viên bi từ hộp này. Giả sử viên bi bạn lấy ra là bi đỏ. Điều này có nghĩa là hộp này thực sự chứa toàn bi đỏ (vì nó không thể là hộp \"lẫn lộn\" hoặc \"toàn bi xanh\" do nhãn sai). \n\nSau đó, bạn biết rằng hộp được dán nhãn \"toàn bi xanh\" không thể chứa toàn bi xanh (vì nhãn sai), và hộp được dán nhãn \"toàn bi đỏ\" không thể chứa toàn bi đỏ (vì nhãn sai). Do đó, hộp được dán nhãn \"toàn bi xanh\" phải chứa hỗn hợp, và hộp được dán nhãn \"toàn bi đỏ\" phải chứa toàn bi xanh.\n\nNếu viên bi bạn lấy ra là bi xanh, lập luận tương tự sẽ cho kết quả ngược lại. \n\nVậy, quy trình suy luận là:  \n1. Chọn hộp dán nhãn \"lẫn lộn\" và lấy một viên bi.  \n2. Dựa vào màu bi lấy ra, xác định chính xác nội dung của hộp đó.  \n3. Dựa vào đó, xác định nội dung của hai hộp còn lại bằng cách loại trừ.",
+          "generation_time": 3.49,
+          "tokens_generated": 301,
+          "tokens_per_second": 86.17,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nMột nghiên cứu cho thấy những thành phố có nhiều cửa hàng kem nhất cũng có tỷ lệ tội phạm cao nhất. Có phải ăn kem gây ra tội phạm không? Hãy giải thích về mối tương quan và quan hệ nhân quả (correlation vs. causation) trong trường hợp này.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nKhông, việc ăn kem không gây ra tội phạm. Mối tương quan giữa số lượng cửa hàng kem và tỷ lệ tội phạm chỉ cho thấy hai hiện tượng xảy ra cùng lúc, chứ không chứng minh có mối quan hệ nhân quả. Có thể có một yếu tố thứ ba, như thời tiết nóng, khiến cả số lượng cửa hàng kem và tỷ lệ tội phạm đều tăng. Do đó, cần cẩn trọng khi suy luận về nguyên nhân và kết quả từ mối tương quan.",
+          "generation_time": 1.23,
+          "tokens_generated": 107,
+          "tokens_per_second": 86.66,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    },
+    {
+      "task": "Technical Explanation",
+      "avg_tokens_per_second": 87.05,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nHãy giải thích cho một người không rành về công nghệ về khái niệm 'Điện toán đám mây' (Cloud Computing) là gì. Sử dụng ví dụ về Google Drive hoặc iCloud để minh họa.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐiện toán đám mây là cách lưu trữ và sử dụng dữ liệu, phần mềm và các dịch vụ thông qua internet thay vì sử dụng máy tính của bạn. Bạn có thể truy cập và sử dụng chúng từ bất cứ đâu có kết nối internet. Ví dụ, khi bạn dùng Google Drive, bạn có thể lưu trữ tài liệu trên máy chủ của Google thay vì trên máy tính của bạn. Như vậy, bạn không cần phải lo lắng về việc giữ dữ liệu trên máy tính và có thể truy cập nó mọi lúc, mọi nơi. iCloud cũng hoạt động tương tự, giúp bạn lưu trữ ảnh, tệp và cài đặt trên máy chủ của Apple.",
+          "generation_time": 1.66,
+          "tokens_generated": 144,
+          "tokens_per_second": 86.85,
+          "vram_usage_gb": 8.73
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nGiải thích một cách đơn giản quá trình quang hợp ở thực vật diễn ra như thế nào và tại sao nó lại quan trọng đối với sự sống trên Trái Đất.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nQuá trình quang hợp ở thực vật diễn ra khi lá cây sử dụng ánh sáng mặt trời, nước và khí carbon dioxide để tạo ra glucose và oxy. Cụ thể, ánh sáng mặt trời cung cấp năng lượng để chuyển hóa nước (từ rễ) và khí carbon dioxide (từ không khí) thành glucose (dùng làm thức ăn cho cây) và oxy (thải ra môi trường). Quá trình này quan trọng vì nó cung cấp nguồn thức ăn cho thực vật và tạo ra oxy, là nguồn oxy duy trì sự sống cho động vật và con người. Ngoài ra, glucose còn là nguồn năng lượng cho nhiều sinh vật khác trong chuỗi thức ăn.",
+          "generation_time": 1.71,
+          "tokens_generated": 149,
+          "tokens_per_second": 87.25,
+          "vram_usage_gb": 8.73
+        }
+      ]
+    }
+  ],
+  "run_name": "Qwen3-8B-Q8_0"
+}

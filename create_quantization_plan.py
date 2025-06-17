@@ -17,18 +17,17 @@ from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Dict
 import warnings
+from benchmark.utils import get_model_hash, get_plan_path
 
 warnings.filterwarnings("ignore")
 
 # === Cấu hình (Không thay đổi) ===
-MODEL_ID = "unsloth/Meta-Llama-3.1-8B-Instruct"
+MODEL_ID = "Qwen/Qwen3-8B"
 MODEL_CACHE_DIR = "./models"
 QUANTIZED_MODEL_CACHE_DIR = "./quantized_models"
-ENTROPY_THRESHOLD_FACTOR = 1.0
-BATCH_SIZE = 4 # Có thể tăng lên nếu RAM của bạn lớn
+ENTROPY_THRESHOLD_FACTOR = 0.65 # Ngưỡng entropy để quyết định lượng tử hóa
+BATCH_SIZE = 16
 
-# --- Các hàm tính toán entropy (Không thay đổi) ---
-# ... (Giữ nguyên các hàm calculate_layer_entropy_efficient, calculate_block_entropy_efficient, create_quantization_plan_batched)
 def calculate_layer_entropy_efficient(layer_weights: torch.Tensor) -> float:
     weights_flat = layer_weights.detach().cpu().half().flatten().numpy()
     hist, _ = np.histogram(weights_flat, bins=128, density=True)
@@ -65,14 +64,6 @@ def create_quantization_plan_batched(model: nn.Module) -> Dict[int, str]:
     print("\n🎯 Final Quantization Plan:")
     print(f"  - Raw Precision:  {counts['raw']} blocks\n  - 8-bit Quantize: {counts['8-bit']} blocks\n  - 4-bit Quantize: {counts['4-bit']} blocks")
     return plan
-# --- Các hàm tiện ích (Không thay đổi) ---
-def get_model_hash(model_id: str, config: dict) -> str:
-    config_str = f"{model_id}-{json.dumps(config, sort_keys=True)}"
-    return hashlib.sha256(config_str.encode()).hexdigest()[:16]
-
-def get_plan_path(model_hash: str) -> Path:
-    cache_dir = Path(QUANTIZED_MODEL_CACHE_DIR); cache_dir.mkdir(parents=True, exist_ok=True)
-    return cache_dir / f"quant_plan_{model_hash}.json"
 
 def main():
     print("🚀 EWQ Plan Generator (CPU-based)")
