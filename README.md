@@ -176,8 +176,8 @@ You can reproduce the entire process by following these steps:
 
 1.  **Setup Environment:**
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/namtb96/Entropy-Weighted-Quantization-PoC.gitgit
+    cd Entropy-Weighted-Quantization-PoC
     pip install -r requirements.txt
     ```
 
