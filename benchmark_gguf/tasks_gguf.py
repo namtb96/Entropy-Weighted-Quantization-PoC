@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Dict, Optional, List
 from tqdm import tqdm
 from llama_cpp import Llama
-from scipy.special import log_softmax
+from datasets import load_dataset
+from evaluate import load 
 
 def _load_mmlu_data_from_csv(mmlu_dir: Path, max_questions_per_subject: Optional[int] = None) -> Dict:
     print(f"  🔍 Searching for MMLU test files in: {mmlu_dir}")
@@ -71,76 +72,89 @@ def run_mmlu_test(llm: Llama, mmlu_dir: Path) -> Dict:
         print(f"    📊 {subject} accuracy: {subject_accuracy:.2f}% ({subject_correct}/{len(questions)})")
     
     overall_accuracy = correct_answers / total_questions * 100 if total_questions > 0 else 0
-    return {'task': 'MMLU Test', 'overall_accuracy': round(overall_accuracy, 2), 'total_correct': correct_answers, 'total_questions': total_questions, 'subject_results': subject_results}
+    return {'task': 'MMLU Test', 'overall_accuracy': round(overall_accuracy, 2), 'total_correct': correct_answers, 'total_questions': total_questions}
 
+def _load_generation_test_data(dataset_name: str, split: str, prompt_column: str, reference_column: str, num_samples: int, cache_dir: str) -> List[Dict[str, str]]:
+    """
+    Tải và xử lý dữ liệu từ một dataset trên Hugging Face Hub, sử dụng cache.
+    """
+    print(f"\n  📦 Loading {num_samples} samples from Hugging Face dataset '{dataset_name}'...")
+    print(f"  💾 Cache directory: '{Path(cache_dir).resolve()}'")
+    try:
+        dataset = load_dataset(dataset_name, split=f"{split}[:{num_samples}]", cache_dir=cache_dir)
+    except Exception as e:
+        print(f"  ❌ Failed to load dataset '{dataset_name}'. Error: {e}")
+        return []
 
-def run_perplexity_test(llm: Llama, categories: Dict[str, list]) -> Dict:
-    """ Chạy Perplexity test bằng cách tính toán thủ công từ logits. """
-    print("  📊 Running Perplexity Test for GGUF model (manual calculation)...")
+    formatted_data = []
+    for sample in dataset:
+        if prompt_column not in sample or reference_column not in sample:
+            continue
+        prompt = f"Summarize the following text:\n\n{sample[prompt_column]}"
+        reference = sample[reference_column]
+        formatted_data.append({'prompt': prompt, 'reference': reference})
     
-    category_results = {}
-    all_perplexities = []
+    return formatted_data
+
+def run_bleu_rouge_test(llm: Llama, dataset_name: str, split: str, prompt_column: str, reference_column: str, num_samples: int = 50) -> Optional[Dict]:
+    """
+    Chạy kiểm tra chất lượng sinh văn bản bằng cách tải dữ liệu, tạo dự đoán và tính điểm BLEU & ROUGE.
+    Dữ liệu sẽ được cache vào thư mục './generation_test_cache'.
+    """
+    print("\n  ✍️  Running BLEU & ROUGE Generation Quality Test...")
     
-    for category_name, passages in categories.items():
-        print(f"    -> Testing category: '{category_name}' ({len(passages)} passages)")
-        perplexities_for_this_category = []
+    # Định nghĩa thư mục cache
+    cache_directory = "./generation_test_cache"
+
+    # Tải dữ liệu bên trong hàm
+    test_data = _load_generation_test_data(
+        dataset_name=dataset_name,
+        split=split,
+        prompt_column=prompt_column,
+        reference_column=reference_column,
+        num_samples=num_samples,
+        cache_dir=cache_directory
+    )
+
+    if not test_data:
+        print("  ⚠️ Skipping test as no data was loaded.")
+        return {'task': 'BLEU/ROUGE Test', 'status': 'Skipped', 'reason': 'Failed to load test data.'}
+
+    try:
+        bleu_metric = load('bleu')
+        rouge_metric = load('rouge')
+    except Exception as e:
+        print(f"  ❌ Error loading metrics: {e}")
+        return {'task': 'BLEU/ROUGE Test', 'status': 'Failed', 'reason': str(e)}
+
+    predictions = []
+    references = []
+
+    print(f"  🚀 Generating {len(test_data)} predictions from the model...")
+    for item in tqdm(test_data, desc="  -> Generating", leave=False):
+        prompt = item['prompt']
+        reference_text = item['reference']
         
-        for passage in tqdm(passages, desc=f"      {category_name}", leave=False):
-            if not passage.strip(): continue
-
-            try:
-                tokens = llm.tokenize(passage.encode("utf-8"))
-                
-                # Perplexity không xác định cho chuỗi có ít hơn 2 token
-                if len(tokens) < 2:
-                    continue
-
-                llm.reset() # Đảm bảo context sạch cho mỗi lần tính
-                llm.eval(tokens)
-                
-                # Lấy logits từ model (yêu cầu logits_all=True khi khởi tạo)
-                logits = np.array(llm.scores) # Shape: (n_tokens, n_vocab)
-                
-                # Tính toán cross-entropy loss
-                # Chúng ta dự đoán token i dựa trên token 0 đến i-1
-                # Vì vậy, logits tại bước i-1 được dùng để dự đoán token i
-                # Logits cho token cuối cùng không được sử dụng để dự đoán gì cả.
-                shifted_logits = logits[:-1, :]
-                
-                # Lấy ID của các token thực tế mà chúng ta cần dự đoán
-                target_tokens = tokens[1:]
-                
-                # Tính log-softmax trên logits
-                log_probs = log_softmax(shifted_logits, axis=-1)
-                
-                # Lấy log-probability của token thực tế
-                log_likelihoods = log_probs[np.arange(len(target_tokens)), target_tokens]
-                
-                # Loss là negative log-likelihood trung bình
-                nll = -np.sum(log_likelihoods)
-                loss = nll / len(target_tokens)
-                
-                perplexity = np.exp(loss)
-                perplexities_for_this_category.append(perplexity)
-
-            except Exception as e:
-                print(f"      [Warning] Could not calculate perplexity for a passage in '{category_name}': {e}")
+        completion = llm.create_completion(prompt, max_tokens=256, temperature=0.1, stop=["\n\n", "Summarize the following text:"])
+        prediction_text = completion['choices'][0]['text'].strip()
         
-        llm.reset() # Reset context sau mỗi category
+        predictions.append(prediction_text)
+        references.append(reference_text)
 
-        if perplexities_for_this_category:
-            avg_ppl = np.mean(perplexities_for_this_category)
-            category_results[category_name] = {'average_perplexity': round(avg_ppl, 4), 'num_passages': len(perplexities_for_this_category)}
-            all_perplexities.extend(perplexities_for_this_category)
-            print(f"    📊 Category '{category_name}' Average PPL: {avg_ppl:.4f}")
-        else:
-            print(f"    ⚠️ No valid perplexity scores calculated for category '{category_name}'.")
+    print("  🔢 Calculating scores...")
+    bleu_score = bleu_metric.compute(predictions=predictions, references=[[r] for r in references])
+    rouge_score = rouge_metric.compute(predictions=predictions, references=references)
 
-    overall_avg_ppl = np.mean(all_perplexities) if all_perplexities else 0.0
-    print(f"\n    📈 Overall Average Perplexity across all categories: {overall_avg_ppl:.4f}")
-
-    return {
-        'task': 'Perplexity Test',
-        'overall_average_perplexity': round(overall_avg_ppl, 4),
-        'category_results': category_results
+    final_results = {
+        'bleu': round(bleu_score['bleu'], 4),
+        'rouge1': round(rouge_score['rouge1'], 4),
+        'rouge2': round(rouge_score['rouge2'], 4),
+        'rougeL': round(rouge_score['rougeL'], 4),
+        'dataset': dataset_name,
+        'num_samples': len(predictions)
     }
+    
+    print(f"    📊 BLEU Score: {final_results['bleu']:.4f}")
+    print(f"    📊 ROUGE-L Score: {final_results['rougeL']:.4f}")
+    
+    return {'task': 'BLEU/ROUGE Test', 'results': final_results}

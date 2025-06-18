@@ -118,7 +118,13 @@ class EnhancedBenchmarkSuiteGGUF:
         print("=" * 80)
 
         mmlu_results = tasks.run_mmlu_test(self.llm, mmlu_dir)
-        perplexity_results = tasks.run_perplexity_test(self.llm, PERPLEXITY_CATEGORIES)
+        bleu_rouge_results = tasks.run_bleu_rouge_test(self.llm, 
+                                                        dataset_name="billsum",
+                                                        split="ca_test",
+                                                        prompt_column="text",
+                                                        reference_column="summary",
+                                                        num_samples=500
+                                                      )
         
         generation_results = []
         for name, prompts in traditional_tasks.items():
@@ -127,7 +133,7 @@ class EnhancedBenchmarkSuiteGGUF:
         overall_stats = {
             'avg_token_speed': np.mean([r['avg_tokens_per_second'] for r in generation_results]) if generation_results else 0,
             'mmlu_accuracy': mmlu_results.get('overall_accuracy', 0),
-            'avg_perplexity': perplexity_results.get('overall_average_perplexity', 0),
+            'bleu': bleu_rouge_results.get('results', 0),
             'vram_usage_gb': self.vram_gb_at_start # Thêm thông số này vào kết quả tổng thể
         }
         
@@ -136,7 +142,6 @@ class EnhancedBenchmarkSuiteGGUF:
             'timestamp': datetime.now().isoformat(),
             'overall_stats': overall_stats,
             'mmlu_results': mmlu_results,
-            'perplexity_results': perplexity_results,
             'generation_results': generation_results
         }
         self.save_and_print_summary(full_results)
@@ -156,12 +161,6 @@ class EnhancedBenchmarkSuiteGGUF:
             print(f"💾 VRAM Usage: {float(stats['vram_usage_gb']):.2f} GB")
         print(f"📈 Average Token Speed (Generation): {float(stats['avg_token_speed']):.2f} tokens/sec")
         print(f"🧠 MMLU Accuracy: {float(stats['mmlu_accuracy']):.2f}%")
-        print(f"📊 Overall Average Perplexity: {float(stats['avg_perplexity']):.4f}")
-        
-        if 'category_results' in results['perplexity_results']:
-            print("\n   --- Perplexity by Category ---")
-            for category, data in results['perplexity_results']['category_results'].items():
-                print(f"   - {category:<25}: {float(data['average_perplexity']):.4f}")
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_model_name = self.model_id.replace('/', '_')

@@ -110,7 +110,15 @@ class EnhancedBenchmarkSuite:
         mmlu_results = tasks.run_mmlu_test(self.model, self.tokenizer, self.device, mmlu_dir)
         gc.collect(); torch.cuda.empty_cache() if torch.cuda.is_available() else None
         
-        perplexity_results = tasks.run_perplexity_test(self.model, self.tokenizer, self.device, PERPLEXITY_CATEGORIES)
+        bleu_rouge_results = tasks.run_bleu_rouge_test(self.model, 
+                                                        self.tokenizer,
+                                                        self.device,
+                                                        dataset_name="billsum",
+                                                        split="ca_test",
+                                                        prompt_column="text",
+                                                        reference_column="summary",
+                                                        num_samples=500
+                                                      )
         gc.collect(); torch.cuda.empty_cache() if torch.cuda.is_available() else None
         
         generation_results = []
@@ -121,7 +129,7 @@ class EnhancedBenchmarkSuite:
         overall_stats = {
             'avg_token_speed': round(np.mean([r['avg_tokens_per_second'] for r in generation_results]), 2) if generation_results else 0,
             'mmlu_accuracy': mmlu_results.get('overall_accuracy', 0),
-            'avg_perplexity': perplexity_results.get('overall_average_perplexity', 0)
+            'bleu': bleu_rouge_results.get('results', 0),
         }
         
         full_results = {
@@ -129,7 +137,6 @@ class EnhancedBenchmarkSuite:
             'timestamp': datetime.now().isoformat(),
             'overall_stats': overall_stats,
             'mmlu_results': mmlu_results,
-            'perplexity_results': perplexity_results,
             'generation_results': generation_results
         }
         self.save_and_print_summary(full_results)
@@ -147,14 +154,6 @@ class EnhancedBenchmarkSuite:
         print("-" * 80)
         print(f"📈 Average Token Speed (Generation): {stats['avg_token_speed']:.2f} tokens/sec")
         print(f"🧠 MMLU Accuracy: {stats['mmlu_accuracy']:.2f}%")
-        print(f"📊 Overall Average Perplexity: {stats['avg_perplexity']:.4f}")
-        
-        # In chi tiết kết quả perplexity theo danh mục
-        if 'category_results' in results['perplexity_results']:
-            print("\n   --- Perplexity by Category ---")
-            for category, data in results['perplexity_results']['category_results'].items():
-                print(f"   - {category:<25}: {data['average_perplexity']:.4f}")
-        
         # Tạo tên file dễ đọc
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         

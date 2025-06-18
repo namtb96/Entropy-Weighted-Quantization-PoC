@@ -10,14 +10,14 @@ warnings.filterwarnings("ignore")
 
 # === CẤU HÌNH CHO MODEL GGUF ===
 # Thay đổi repo ID và tên file cho phù hợp với model bạn muốn test
-MODEL_REPO_ID = "unsloth/Llama-3.1-8B-Instruct-GGUF"
-MODEL_FILE = "unsloth/Llama-3.1-8B-Instruct-GGUF" 
+MODEL_REPO_ID = "Qwen/Qwen3-8B-GGUF"
+MODEL_FILE = "Qwen3-8B-Q8_0.gguf" 
 MODEL_CACHE_DIR = "./models"
 
 # Cấu hình cho Llama.cpp
 GGUF_CONFIG = {
     "n_gpu_layers": -1,  # Offload tất cả các layer lên GPU. Đặt là 0 nếu chỉ dùng CPU.
-    "n_ctx": 4096,       # Kích thước ngữ cảnh
+    "n_ctx": 8192,       # Kích thước ngữ cảnh
     "verbose": False     # Tắt log chi tiết của llama.cpp
 }
 
