@@ -1,0 +1,202 @@
+{
+  "model_hash": "a257963a7798a92c",
+  "timestamp": "2025-06-18T09:23:12.484259",
+  "overall_stats": {
+    "avg_token_speed": 95.18125,
+    "mmlu_accuracy": 70.05,
+    "bleu": {
+      "bleu": 0.0322,
+      "rouge1": 0.2544,
+      "rouge2": 0.0724,
+      "rougeL": 0.1548,
+      "dataset": "billsum",
+      "num_samples": 500
+    },
+    "vram_usage_gb": 8.5390625
+  },
+  "mmlu_results": {
+    "task": "MMLU Test",
+    "overall_accuracy": 70.05,
+    "total_correct": 9836,
+    "total_questions": 14042
+  },
+  "generation_results": [
+    {
+      "task": "Code Generation",
+      "avg_tokens_per_second": 95.54,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nViết một script Python sử dụng thư viện Pandas để đọc file CSV có tên `sales_data.csv` với các cột 'Date', 'Product', 'Revenue'. Script cần tính tổng doanh thu theo từng sản phẩm và xuất kết quả ra một file CSV mới có tên `revenue_by_product.csv`.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\n```python\nimport pandas as pd\n\n# Đọc dữ liệu từ file CSV\ndf = pd.read_csv('sales_data.csv')\n\n# Tính tổng doanh thu theo từng sản phẩm\nrevenue_by_product = df.groupby('Product')['Revenue'].sum().reset_index()\n\n# Xuất kết quả ra file CSV mới\nrevenue_by_product.to_csv('revenue_by_product.csv', index=False)\n```",
+          "generation_time": 0.93,
+          "tokens_generated": 88,
+          "tokens_per_second": 94.68,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nTạo một component React functional bằng TypeScript tên là `UserProfile`. Component này nhận vào props là `name` (string), `age` (number), và `avatarUrl` (string), sau đó hiển thị thông tin này một cách có cấu trúc.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\n```tsx\nimport React from 'react';\n\ninterface UserProfileProps {\n  name: string;\n  age: number;\n  avatarUrl: string;\n}\n\nconst UserProfile: React.FC<UserProfileProps> = ({ name, age, avatarUrl }) => {\n  return (\n    <div>\n      <img src={avatarUrl} alt={name} />\n      <h2>{name}</h2>\n      <p>Age: {age}</p>\n    </div>\n  );\n};\n\nexport default UserProfile;\n```",
+          "generation_time": 1.11,
+          "tokens_generated": 107,
+          "tokens_per_second": 96.4,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Math Problem Solving",
+      "avg_tokens_per_second": 95.54499999999999,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nMột bể nước có hai vòi. Vòi thứ nhất chảy một mình thì đầy bể trong 4 giờ. Vòi thứ hai chảy một mình thì đầy bể trong 6 giờ. Nếu mở cả hai vòi cùng một lúc khi bể cạn, hỏi sau bao lâu thì bể sẽ đầy? Trình bày các bước giải chi tiết.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐể giải bài toán, ta thực hiện các bước sau:\n\n**Bước 1:** Xác định công suất của từng vòi.  \n- Vòi thứ nhất chảy đầy bể trong 4 giờ nên mỗi giờ chảy được:  \n  $$\n  \\frac{1}{4} \\text{ bể/giờ}\n  $$  \n- Vòi thứ hai chảy đầy bể trong 6 giờ nên mỗi giờ chảy được:  \n  $$\n  \\frac{1}{6} \\text{ bể/giờ}\n  $$\n\n**Bước 2:** Tính tổng công suất khi cả hai vòi cùng mở.  \n$$\n\\frac{1}{4} + \\frac{1}{6} = \\frac{3}{12} + \\frac{2}{12} = \\frac{5}{12} \\text{ bể/giờ}\n$$\n\n**Bước 3:** Tính thời gian để đầy bể khi cả hai vòi cùng mở.  \n$$\n\\text{Thời gian} = \\frac{1}{\\frac{5}{12}} = \\frac{12}{5} = 2.4 \\text{ giờ}\n$$\n\n**Kết luận:** Bể sẽ đầy sau **2.4 giờ**.",
+          "generation_time": 3.0,
+          "tokens_generated": 286,
+          "tokens_per_second": 95.49,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nMột người gửi tiết kiệm 500 triệu đồng với lãi suất kép 6.5% mỗi năm. Hỏi sau 5 năm, người đó sẽ nhận được cả vốn lẫn lãi là bao nhiêu tiền? Yêu cầu trình bày công thức và các bước tính toán.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐể tính số tiền cả vốn lẫn lãi sau 5 năm với lãi suất kép, ta sử dụng công thức:\n\n$$\nA = P(1 + r)^t\n$$\n\nTrong đó:\n- $ A $: Số tiền cả vốn lẫn lãi sau $ t $ năm\n- $ P $: Số tiền ban đầu (vốn)\n- $ r $: Lãi suất hàng năm (dưới dạng thập phân)\n- $ t $: Số năm\n\n**Áp dụng vào bài toán:**\n- $ P = 500 $ triệu đồng\n- $ r = 6.5\\% = 0.065 $\n- $ t = 5 $ năm\n\n**Bước 1:** Tính $ (1 + r)^t = (1 + 0.065)^5 $\n\n$$\n(1 + 0.065)^5 = 1.37008616\n$$\n\n**Bước 2:** Tính $ A = 500 \\times 1.37008616 $\n\n$$\nA = 685.04308 \\text{ triệu đồng}\n$$\n\n**Kết luận:** Sau 5 năm, người đó sẽ nhận được cả vốn lẫn lãi là khoảng **685.04 triệu đồng**.",
+          "generation_time": 3.02,
+          "tokens_generated": 289,
+          "tokens_per_second": 95.6,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Text Summarization",
+      "avg_tokens_per_second": 93.555,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nHãy tóm tắt đoạn văn sau thành 3 ý chính: 'Các công nghệ thu giữ carbon (Carbon Capture Technologies) đang nổi lên như một giải pháp tiềm năng trong cuộc chiến chống biến đổi khí hậu. Các phương pháp chính bao gồm thu giữ sau đốt cháy, thu giữ trước đốt cháy và thu giữ từ không khí trực tiếp (DAC). Mặc dù có tiềm năng lớn, công nghệ này vẫn đối mặt với những thách thức về chi phí vận hành cao, hiệu quả năng lượng và vấn đề lưu trữ carbon an toàn trong dài hạn. Các chính phủ và tập đoàn lớn đang đầu tư hàng tỷ USD vào R&D để cải thiện hiệu quả và giảm giá thành, hy vọng biến nó thành một công cụ chủ chốt vào năm 2050.'<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\n1. Công nghệ thu giữ carbon là giải pháp tiềm năng trong cuộc chiến chống biến đổi khí hậu.  \n2. Các phương pháp chính bao gồm thu giữ sau đốt cháy, trước đốt cháy và từ không khí trực tiếp (DAC).  \n3. Công nghệ này gặp thách thức về chi phí, hiệu quả năng lượng và lưu trữ carbon, nhưng đang được đầu tư mạnh để phát triển.",
+          "generation_time": 0.96,
+          "tokens_generated": 88,
+          "tokens_per_second": 91.32,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nTóm tắt ngắn gọn những sự kiện chính và ý nghĩa lịch sử của cuộc Cách mạng Công nghiệp lần thứ nhất, tập trung vào các phát minh quan trọng và tác động của nó đến xã hội.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nCuộc Cách mạng Công nghiệp lần thứ nhất (thế kỷ 18 - đầu thế kỷ 19) bắt đầu ở Anh, với các phát minh quan trọng như máy hơi nước của James Watt, máy dệt tự động (Spinning Jenny), và xe lửa của George Stephenson. Sự kiện này đánh dấu sự chuyển đổi từ sản xuất thủ công sang sản xuất cơ khí, thúc đẩy sự phát triển của công nghiệp và đô thị hóa. Ý nghĩa lịch sử là nền tảng cho sự phát triển kinh tế hiện đại, thay đổi cơ cấu xã hội, tạo ra giai cấp công nhân và làm thay đổi cách sống của con người.",
+          "generation_time": 1.51,
+          "tokens_generated": 145,
+          "tokens_per_second": 95.79,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Creative Writing",
+      "avg_tokens_per_second": 95.24000000000001,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nViết đoạn mở đầu cho một câu chuyện ngắn thuộc thể loại khoa học viễn tưởng, trong đó nhân vật chính là một nhà thực vật học sống trên Sao Hỏa, người vừa phát hiện ra một loài cây có khả năng giao tiếp bằng ánh sáng.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nTrên bề mặt đỏ thẫm của Sao Hỏa, nơi ánh nắng mặt trời yếu ớt và gió bụi thổi qua những dãy núi đá vôi, nhà thực vật học Lira Veyn đang thực hiện một khám phá đầy bất ngờ. Trong một lần khảo sát tại khu vực sa mạc Tharsis, cô đã phát hiện ra một loài cây kỳ lạ, không chỉ có khả năng sinh tồn trong điều kiện khắc nghiệt mà còn có thể giao tiếp bằng ánh sáng – một khả năng vượt xa mọi hiểu biết của loài người.",
+          "generation_time": 1.34,
+          "tokens_generated": 127,
+          "tokens_per_second": 94.84,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nViết một bài văn ngắn (khoảng 150 từ) miêu tả cảnh một phiên chợ nổi trên sông Cửu Long vào buổi sáng sớm, tập trung vào âm thanh, màu sắc và mùi vị đặc trưng.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nPhiên chợ nổi trên sông Cửu Long vào buổi sáng sớm thật sống động. Tiếng chuông đồng rộn rã, tiếng ghe chèo, tiếng cười nói rộn ràng vang lên giữa không khí trong lành. Mùi cá tươi, rau củ, hoa quả pha trộn với mùi nước sông và hơi sương sớm tạo nên hương vị đặc trưng. Màu sắc rực rỡ của các gánh hàng, từ những trái chín mọng, rau xanh tươi tắn đến những chiếc đèn lồng đỏ rực, làm cho cảnh chợ thêm sinh động. Những con thuyền nhỏ lững lờ trôi, người buôn bán nhanh tay, khách mua sắm tấp nập. Tất cả hòa quyện tạo nên khung cảnh độc đáo, đầy sức sống của phiên chợ nổi.",
+          "generation_time": 1.98,
+          "tokens_generated": 189,
+          "tokens_per_second": 95.64,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Question Answering",
+      "avg_tokens_per_second": 95.21000000000001,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nGiải thích sự khác biệt cơ bản giữa năng lượng hạt nhân phân hạch (nuclear fission) và tổng hợp hạt nhân (nuclear fusion). Loại nào hiện đang được sử dụng trong các nhà máy điện?<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nNăng lượng hạt nhân phân hạch là quá trình tách một hạt nhân nặng thành các hạt nhân nhẹ hơn, giải phóng năng lượng, trong khi năng lượng hạt nhân tổng hợp là quá trình kết hợp các hạt nhân nhẹ thành một hạt nhân nặng hơn, cũng giải phóng năng lượng. Hiện nay, phân hạch là loại được sử dụng trong các nhà máy điện hạt nhân.",
+          "generation_time": 0.88,
+          "tokens_generated": 83,
+          "tokens_per_second": 94.74,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nCon đường tơ lụa là gì và nó có vai trò quan trọng như thế nào đối với sự phát triển của các nền văn minh cổ đại?<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nCon đường tơ lụa là một tuyến đường thương mại cổ đại nối Trung Quốc với các vùng đất khác như Ấn Độ, Ai Cập, Hy Lạp và La Mã. Nó đóng vai trò quan trọng trong việc thúc đẩy giao lưu văn hóa, thương mại và truyền bá tôn giáo giữa các nền văn minh cổ đại, góp phần làm phong phú và phát triển các nền văn hóa trên toàn thế giới.",
+          "generation_time": 0.99,
+          "tokens_generated": 95,
+          "tokens_per_second": 95.68,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Language Translation & Nuance",
+      "avg_tokens_per_second": 94.435,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nDịch đoạn văn sau sang tiếng Việt, chú ý giữ văn phong chuyên nghiệp: 'Our team is conducting a comprehensive due diligence process to assess the viability of the potential acquisition. Key performance indicators (KPIs) and financial statements are under rigorous scrutiny.'<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐội ngũ của chúng tôi đang tiến hành quy trình kiểm tra kỹ lưỡng để đánh giá tính khả thi của việc mua lại tiềm năng. Các chỉ số hiệu suất chính (KPI) và báo cáo tài chính đang được xem xét một cách nghiêm túc.",
+          "generation_time": 0.64,
+          "tokens_generated": 60,
+          "tokens_per_second": 93.39,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nGiải thích ý nghĩa và tìm câu thành ngữ tiếng Anh có nghĩa tương đương với câu 'Nước đến chân mới nhảy'.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nÝ nghĩa của câu \"Nước đến chân mới nhảy\" là: Chỉ hành động trốn tránh, chờ đến khi sự việc đã đến mức không thể lùi bước nữa mới chịu đựng hoặc hành động.  \n\nCâu thành ngữ tiếng Anh có nghĩa tương đương là: **\"When the cat's away, the mice will play.\"**",
+          "generation_time": 0.8,
+          "tokens_generated": 76,
+          "tokens_per_second": 95.48,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Reasoning & Logic",
+      "avg_tokens_per_second": 95.72999999999999,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nCó ba chiếc hộp. Một hộp chứa toàn bi đỏ, một hộp chứa toàn bi xanh, và một hộp chứa lẫn lộn cả bi đỏ và bi xanh. Cả ba hộp đều bị dán nhãn sai. Bạn chỉ được phép lấy ra một viên bi từ một hộp duy nhất (không được nhìn vào bên trong). Làm thế nào để xác định chính xác nội dung của cả ba hộp? Hãy giải thích quá trình suy luận của bạn.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐầu tiên, bạn nên chọn hộp được dán nhãn \"lẫn lộn\". Vì tất cả các hộp đều bị dán nhãn sai, hộp này không thể chứa cả bi đỏ và bi xanh. Do đó, bạn chỉ cần rút một viên bi từ hộp này:\n\n- Nếu viên bi rút ra là **đỏ**, thì hộp này thực chất chứa **toàn bi đỏ** (vì nhãn \"lẫn lộn\" sai).\n- Nếu viên bi rút ra là **xanh**, thì hộp này thực chất chứa **toàn bi xanh** (vì nhãn \"lẫn lộn\" sai).\n\nSau đó, bạn có thể xác định các hộp còn lại dựa trên thông tin này:\n\n- Hộp được dán nhãn \"toàn bi đỏ\" không thể chứa toàn bi đỏ (vì nhãn sai), và cũng không thể chứa lẫn lộn (vì đã xác định hộp \"lẫn lộn\"), nên nó phải chứa **toàn bi xanh**.\n- Hộp được dán nhãn \"toàn bi xanh\" không thể chứa toàn bi xanh (vì nhãn sai), và cũng không thể chứa toàn bi đỏ (vì đã xác định hộp \"toàn bi đỏ\"), nên nó phải chứa **lẫn lộn**.\n\nVậy, quy trình là: rút bi từ hộp dán nhãn \"lẫn lộn\", sau đó suy luận ngược lại.",
+          "generation_time": 3.14,
+          "tokens_generated": 299,
+          "tokens_per_second": 95.14,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nMột nghiên cứu cho thấy những thành phố có nhiều cửa hàng kem nhất cũng có tỷ lệ tội phạm cao nhất. Có phải ăn kem gây ra tội phạm không? Hãy giải thích về mối tương quan và quan hệ nhân quả (correlation vs. causation) trong trường hợp này.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nKhông, ăn kem không gây ra tội phạm. Mối quan hệ giữa số lượng cửa hàng kem và tỷ lệ tội phạm là một mối tương quan (correlation), nhưng không phải mối quan hệ nhân quả (causation). Cả hai hiện tượng có thể được liên kết bởi một yếu tố thứ ba, như thời tiết nóng. Khi thời tiết nóng, cả người dân có xu hướng ăn kem nhiều hơn và cũng có xu hướng phạm tội nhiều hơn. Do đó, mối tương quan không chứng minh rằng ăn kem gây ra tội phạm, mà chỉ cho thấy một mối liên hệ có thể do yếu tố khác gây ra.",
+          "generation_time": 1.43,
+          "tokens_generated": 138,
+          "tokens_per_second": 96.32,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    },
+    {
+      "task": "Technical Explanation",
+      "avg_tokens_per_second": 96.195,
+      "tests": [
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nHãy giải thích cho một người không rành về công nghệ về khái niệm 'Điện toán đám mây' (Cloud Computing) là gì. Sử dụng ví dụ về Google Drive hoặc iCloud để minh họa.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nĐiện toán đám mây là cách lưu trữ và sử dụng dữ liệu, phần mềm và các dịch vụ trên internet thay vì trên máy tính cá nhân của bạn. Bạn có thể truy cập và sử dụng chúng từ bất kỳ đâu, chỉ cần có internet. Ví dụ, khi bạn dùng Google Drive, bạn có thể lưu trữ tài liệu trên máy chủ của Google thay vì trên máy tính của bạn. Tương tự, khi dùng iCloud, bạn có thể lưu ảnh, video và các tệp khác lên máy chủ của Apple và truy cập chúng từ bất kỳ thiết bị nào. Đây là cách đơn giản để lưu trữ và chia sẻ dữ liệu mà không cần phải giữ tất cả thông tin trên máy tính của bạn.",
+          "generation_time": 1.62,
+          "tokens_generated": 156,
+          "tokens_per_second": 96.15,
+          "vram_usage_gb": 8.54
+        },
+        {
+          "prompt": "<|im_start|>system\nYou are a helpful assistant. Provide a direct and concise answer to the user's request. Do not show your thought process, reasoning steps, or self-correction. Respond only with the final answer.<|im_end|>\n<|im_start|>user\nGiải thích một cách đơn giản quá trình quang hợp ở thực vật diễn ra như thế nào và tại sao nó lại quan trọng đối với sự sống trên Trái Đất.<|im_end|>\n<|im_start|>assistant\n",
+          "response": "<think>\n</think>\n\nQuá trình quang hợp ở thực vật diễn ra khi cây sử dụng ánh sáng mặt trời, nước và khí carbon dioxide để tạo ra glucose và oxy. Cây hấp thụ nước từ rễ, khí carbon dioxide từ không khí qua lá, và sử dụng ánh sáng mặt trời để chuyển hóa chúng thành năng lượng hóa học trong glucose. Oxy được thải ra môi trường. Quá trình này quan trọng vì nó cung cấp nguồn thức ăn cho thực vật và sinh vật khác, đồng thời sản xuất oxy cần thiết cho sự sống của con người và động vật.",
+          "generation_time": 1.29,
+          "tokens_generated": 124,
+          "tokens_per_second": 96.24,
+          "vram_usage_gb": 8.54
+        }
+      ]
+    }
+  ],
+  "run_name": "Qwen3-8B-gguf-ewq"
+}

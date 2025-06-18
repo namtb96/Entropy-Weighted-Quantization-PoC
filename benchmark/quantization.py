@@ -44,8 +44,11 @@ def check_quantized_model_exists(model_hash: str) -> bool:
 def load_quantized_model(model_id: str, model_hash: str, model_cache_dir: str) -> Tuple[Optional[nn.Module], Optional[AutoTokenizer]]:
     plan_path = get_plan_path(model_hash)
     print(f"  📄 Loading quantization plan from: {plan_path}")
+    
     with open(plan_path, 'r') as f:
-        quant_plan = {int(k): v for k, v in json.load(f).items()}
+        data = json.load(f)
+        plan_data = data.get('plan')
+        quant_plan = {int(k): v for k, v in plan_data.items()}
 
     print("  📥 Loading base model to CPU...")
     model = AutoModelForCausalLM.from_pretrained(

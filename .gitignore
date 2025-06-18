@@ -33,3 +33,5 @@ venv/
 # Misc
 *.swp
 *.swo
+
+generation_test_cache/
