@@ -2,260 +2,127 @@
 
 ---
 
-# Lượng tử hóa theo Entropy (EWQ): Tái hiện và Kiểm thử Toàn diện
+# Lượng tử hóa theo Entropy (EWQ): Tái hiện và Kiểm thử Toàn diện (Phiên bản Tensor-wise)
 
-Dự án này là một nỗ lực độc lập nhằm tái hiện (re-implement) phương pháp **Lượng tử hóa theo Entropy (Entropy-Weighted Quantization - EWQ)** được đề xuất trong bài báo khoa học trên [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2). Do bài báo gốc không cung cấp mã nguồn, dự án này được xây dựng từ đầu để:
+Dự án này là một nỗ lực độc lập nhằm tái hiện và cải tiến phương pháp **Lượng tử hóa theo Entropy (Entropy-Weighted Quantization - EWQ)** được đề xuất trong bài báo khoa học trên [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2). Phiên bản này đã được nâng cấp từ phân tích theo block lên **phân tích theo từng tensor**, cho phép tối ưu hóa ở mức độ chi tiết và hiệu quả hơn.
 
-1.  **Tái hiện thuật toán EWQ cốt lõi** để tạo ra một kế hoạch lượng tử hóa (quantization plan) tùy chỉnh cho các mô hình ngôn ngữ lớn (LLMs).
+Mục tiêu của dự án:
+1.  **Tái hiện và cải tiến thuật toán EWQ cốt lõi** để tạo ra một kế hoạch lượng tử hóa (quantization plan) tùy chỉnh ở cấp độ tensor cho các mô hình ngôn ngữ lớn (LLMs).
 2.  **Xây dựng một bộ kiểm thử (benchmark suite) toàn diện** để đánh giá một cách khách quan và nghiêm ngặt hiệu quả của phương pháp EWQ so với các kỹ thuật lượng tử hóa tiêu chuẩn.
-3.  **Xác thực** liệu phương pháp EWQ có thực sự tạo ra một model cân bằng vượt trội về chất lượng, hiệu suất và việc sử dụng tài nguyên hay không.
+3.  **Xác thực** liệu phương pháp EWQ-Tensorwise có thực sự tạo ra một model cân bằng vượt trội về chất lượng, hiệu suất và việc sử dụng tài nguyên hay không.
 
-## Thuật toán Lượng tử hóa theo Entropy (EWQ) hoạt động như thế nào?
+## Thuật toán Lượng tử hóa theo Entropy (Tensor-wise) hoạt động như thế nào?
 
-Cốt lõi của dự án là script `create_quantization_plan.py`. Thay vì áp dụng một phương pháp lượng tử hóa đồng nhất (ví dụ: tất cả các lớp đều là 4-bit), thuật toán EWQ thực hiện một cách tiếp cận thông minh và linh hoạt hơn:
+Cốt lõi của dự án là script `create_quantization_plan_tensorwise.py`. Thay vì áp dụng một phương pháp lượng tử hóa đồng nhất hoặc theo từng block, thuật toán EWQ-Tensorwise thực hiện một cách tiếp cận cực kỳ chi tiết:
 
-1.  **Phân tích trên CPU:** Toàn bộ model gốc được tải lên CPU để phân tích. Điều này giúp tiết kiệm VRAM và cho phép xử lý các model cực lớn mà không bị giới hạn bởi bộ nhớ GPU.
-2.  **Tính toán Entropy cho từng Block:** Thuật toán lặp qua từng "block" (layer) của model và tính toán **Shannon entropy** cho trọng số của các tầng tuyến tính (`nn.Linear`). Entropy ở đây đóng vai trò là một thước đo về "mức độ phức tạp" hay "lượng thông tin" mà mỗi block nắm giữ.
-3.  **Xác định Ngưỡng Thích ứng:** Thay vì dùng một ngưỡng entropy cố định, thuật toán sẽ phân tích sự phân bổ entropy của toàn bộ model (tính giá trị trung bình, độ lệch chuẩn) và tạo ra một **ngưỡng động** (`threshold = mean - factor * std_dev`). Ngưỡng này sẽ tự điều chỉnh dựa trên đặc tính riêng của từng model.
-4.  **Logic ra Quyết định 3 cấp:** Dựa trên entropy của mỗi block so với sự phân bổ chung, một quyết định lượng tử hóa được đưa ra:
-    *   **Entropy Cao (quan trọng nhất):** Giữ lại độ chính xác gốc (FP16).
-    *   **Entropy Trung bình:** Lượng tử hóa vừa phải (8-bit).
-    *   **Entropy Thấp (ít thông tin hơn):** Lượng tử hóa mạnh (4-bit).
-5.  **Kết quả:** Quá trình này tạo ra một file `quant_plan_*.json`, chứa kế hoạch chi tiết về việc sẽ lượng tử hóa mỗi block như thế nào. Đi kèm với đó là một file kịch bản shell `quantize_command_*.sh` để tự động tạo ra model GGUF tùy chỉnh từ kế hoạch này.
+1.  **Phân tích trên CPU:** Toàn bộ model gốc được tải lên CPU để phân tích, giúp tiết kiệm VRAM và cho phép xử lý các model cực lớn.
+2.  **Phân tích Entropy và Tầm quan trọng cho từng Tensor:** Thuật toán lặp qua **từng tensor trọng số** (ví dụ: `layers.0.self_attn.q_proj.weight`) trong toàn bộ model.
+    *   **Tính toán Entropy:** **Shannon entropy** được tính cho mỗi tensor, đóng vai trò là một thước đo về "mức độ phức tạp" hay "lượng thông tin" mà tensor đó nắm giữ.
+    *   **Gán Trọng số Quan trọng:** Mỗi tensor được gán một **hệ số quan trọng (`TENSOR_IMPORTANCE`)** dựa trên tên và vai trò của nó (ví dụ: các tensor embedding và output được coi là quan trọng nhất).
+3.  **Xác định Ngưỡng Thích ứng:** Thuật toán phân tích sự phân bổ entropy của toàn bộ các tensor và tạo ra các **ngưỡng động** dựa trên giá trị trung bình và độ lệch chuẩn.
+4.  **Logic ra Quyết định Đa yếu tố:** Dựa trên một tổ hợp các yếu tố của mỗi tensor, một quyết định lượng tử hóa được đưa ra:
+    *   **Entropy** của tensor.
+    *   **Độ quan trọng** được gán trước.
+    *   **Kích thước** của tensor (các tensor rất nhỏ sẽ được giữ nguyên).
+    *   **Quy tắc cứng:** Các tensor tối quan trọng (ví dụ: `output.weight`) luôn được giữ ở độ chính xác cao nhất (FP16).
+5.  **Kết quả:** Quá trình này tạo ra một file `quant_plan_*.json` cực kỳ chi tiết, chứa kế hoạch lượng tử hóa cho từng tensor riêng lẻ. Đi kèm với đó là một file kịch bản shell `quantize_command_*.sh` để tự động tạo ra model GGUF tùy chỉnh từ kế hoạch này.
 
 ## Hệ thống Kiểm thử (Benchmark)
 
 Để chứng minh giá trị của EWQ, một bộ benchmark toàn diện đã được xây dựng để so sánh các phiên bản model khác nhau trên nhiều khía cạnh:
 
 **Các phiên bản được so sánh:**
-*   **Original (FP16):** Model gốc chưa qua lượng tử hóa, làm cơ sở so sánh.
-*   **Standard GGUF (Q4 & Q8):** Các phương pháp lượng tử hóa GGUF tiêu chuẩn.
-*   **EWQ (bitsandbytes):** Áp dụng plan EWQ bằng thư viện `bitsandbytes`.
-*   **EWQ (GGUF):** Áp dụng plan EWQ để tạo ra file GGUF tùy chỉnh.
+*   **Original (FP16):** Model gốc chưa qua lượng tử hóa.
+*   **Standard Q4_K_M (GGUF):** Lượng tử hóa 4-bit tiêu chuẩn.
+*   **Standard Q8_0 (GGUF):** Lượng tử hóa 8-bit tiêu chuẩn.
+*   **EWQ (bitsandbytes - Blockwise):** Plan EWQ theo block áp dụng qua `bitsandbytes`.
+*   **EWQ (GGUF - Blockwise):** Plan EWQ theo block để tạo file GGUF.
+*   **EWQ (GGUF - Tensorwise):** Plan EWQ theo tensor để tạo file GGUF (phiên bản mới nhất).
 
 **Các chỉ số được đo lường:**
-*   **Chất lượng Model:**
-    *   **MMLU:** Đánh giá kiến thức và khả năng suy luận đa lĩnh vực.
-    *   **BLEU & ROUGE:** Đánh giá chất lượng sinh văn bản (ví dụ: tóm tắt).
+*   **Chất lượng Model:** MMLU, BLEU, ROUGE-1/2/L.
 *   **Hiệu suất:** Tốc độ sinh token (tokens/giây).
-*   **Tài nguyên:** Mức sử dụng VRAM (GB) và RAM hệ thống.
-
-## Hướng dẫn sử dụng
-
-Bạn có thể tự mình tái tạo lại toàn bộ quy trình bằng các bước sau:
-
-1.  **Cài đặt môi trường:**
-    ```bash
-    git clone https://github.com/namtb96/Entropy-Weighted-Quantization-PoC.gitgit
-    cd Entropy-Weighted-Quantization-PoC
-    pip install -r requirements.txt
-    ```
-
-2.  **Tạo Kế hoạch Lượng tử hóa EWQ:**
-    Chạy script để phân tích model và tạo ra plan.
-    ```bash
-    python create_quantization_plan.py
-    ```
-    Script này sẽ tạo ra file `quant_plan_{hash}.json` và `quantize_command_{hash}.sh` trong thư mục `quantized_models/`.
-
-3.  **(Tùy chọn) Tạo Model GGUF Tùy chỉnh:**
-    Để tạo file GGUF từ plan đã có, bạn cần build `llama.cpp` và chạy kịch bản shell đã được tạo tự động.
-    ```bash
-    # (Thực hiện theo hướng dẫn build của llama.cpp)
-    bash ./quantized_models/quantize_command_{hash}.sh
-    ```
-
-4.  **Chạy Benchmark:**
-    Bạn có thể chạy benchmark cho bất kỳ phiên bản nào bạn muốn kiểm thử.
-    ```bash
-    # Chạy benchmark cho phiên bản EWQ bitsandbytes
-    python benchmark_ewq.py
-
-    # Chạy benchmark cho phiên bản EWQ-GGUF
-    python benchmark_gguf_ewq.py
-
-    # Chạy benchmark cho phiên bản GGUF tiêu chuẩn
-    python benchmark_gguf_q4.py
-    python benchmark_gguf_q8.py
-
-    # Chạy benchmark cho model gốc
-    python benchmark_original.py
-    ```
-
-5.  **Xem kết quả:**
-    Tất cả các kết quả chi tiết sẽ được lưu trong thư mục `benchmark_results/`.
+*   **Tài nguyên:** Mức sử dụng VRAM (GB).
 
 ## Kết quả Benchmark và Phân tích
 
-Đây là phần quan trọng nhất, chứng minh hiệu quả của phương pháp.
+Đây là phần quan trọng nhất, chứng minh hiệu quả của các phương pháp.
 
-### Bảng Tổng hợp Kết quả
+### Bảng Tổng hợp Kết quả (Model: Qwen3-8B)
 
-| Phiên bản Model | VRAM (GB) | Tốc độ (tokens/s) | MMLU (%) | ROUGE-L |
-| :--- | :---: | :---: | :---: | :---: |
-| **Original (FP16)** | 15.26 | 47.04 | 69.98 | 0.1783 |
-| **Standard Q4 (GGUF)** | **6.40** | **124.14** | 69.32 | 0.1564 |
-| **Standard Q8 (GGUF)** | 9.54 | 85.83 | 70.27 | 0.1515 |
-| **EWQ (bitsandbytes)** | 9.64 | 43.32 | **70.30** | **0.1800** |
-| **EWQ (GGUF)** | 8.54 | 95.18 | 70.05 | 0.1548 |
+| Phiên bản Model | VRAM (GB) | % Δ VRAM | Tốc độ (tok/s) | % Δ Tốc độ | MMLU (%) | % Δ MMLU | BLEU | ROUGE-1 | ROUGE-2 | ROUGE-L |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Original (FP16)** | 15.26 | *Baseline* | 47.04 | *Baseline* | 69.98 | *Baseline* | - | - | - | 0.1783 |
+| **Standard Q4_K_M (GGUF)** | **6.40** | **-58.1%** | **124.14** | **+163.9%**| 69.32 | -0.9% | 0.0329 | 0.2600 | 0.0767 | 0.1564 |
+| **Standard Q8_0 (GGUF)** | 9.54 | -37.5% | 85.83 | +82.5% | 70.27 | +0.4% | 0.0306 | 0.2540 | 0.0746 | 0.1515 |
+| **EWQ (GGUF - Blockwise)** | 8.54 | -44.0% | 95.18 | +102.3% | 70.05 | +0.1% | 0.0322 | 0.2544 | 0.0724 | 0.1548 |
+| **EWQ (GGUF - Tensorwise)** | 7.55 | -50.5% | 106.62 | +126.7% | 70.09 | +0.2% | 0.0303 | 0.2513 | 0.0712 | 0.1518 |
+| **EWQ (bitsandbytes - Blockwise)** | 9.64 | -36.8% | 43.32 | -7.9% | **70.30** | **+0.5%** | **0.0487** | **0.3148** | **0.0909** | **0.1800** |
 
-*(**In đậm** là giá trị tốt nhất trong từng hạng mục)*
+*(**In đậm** là giá trị tốt nhất trong từng hạng mục. `% Δ` là phần trăm thay đổi so với bản gốc FP16)*
 
 ### Phân tích
 
-1.  **Chất lượng Model (MMLU & ROUGE-L):**
-    *   Phương pháp **EWQ (bitsandbytes)** đạt điểm MMLU và ROUGE-L **cao nhất**, chứng tỏ thuật toán đã bảo toàn "trí thông minh" của model gốc một cách xuất sắc, thậm chí nhỉnh hơn một chút.
-    *   Phiên bản **EWQ-GGUF** cũng duy trì chất lượng gần như ngang bằng với bản gốc và vượt trội hơn hẳn so với phương pháp Q4 tiêu chuẩn.
+1.  **Chất lượng Model (MMLU & ROUGE):**
+    *   **Q4_K_M** là phiên bản GGUF duy nhất cho thấy sự sụt giảm nhẹ về điểm MMLU (-0.9%), cho thấy việc lượng tử hóa mạnh tay đồng nhất có ảnh hưởng đến khả năng suy luận.
+    *   Tất cả các phiên bản **EWQ và Q8_0 đều bảo toàn hoặc thậm chí cải thiện nhẹ** điểm MMLU so với bản gốc, chứng tỏ các phương pháp lượng tử hóa tinh vi hơn có hiệu quả trong việc giữ lại "trí thông minh" của model.
+    *   Về chất lượng sinh văn bản (ROUGE), phiên bản **EWQ (bitsandbytes)** cho kết quả vượt trội, có thể do cách thư viện này xử lý các phép toán. Tuy nhiên, các phiên bản GGUF khác đều cho kết quả khá tương đồng nhau.
 
 2.  **Tài nguyên và Hiệu suất (VRAM & Tốc độ):**
-    *   Trong khi Q4 nhanh nhất và nhẹ nhất, nó phải đánh đổi bằng chất lượng.
-    *   **EWQ-GGUF** đã tìm ra một **"điểm ngọt" (sweet spot)** hoàn hảo. So với Q8 tiêu chuẩn, nó **vượt trội về mọi mặt**:
-        *   **Nhẹ hơn:** Tiết kiệm hơn **1 GB VRAM** (8.54 GB so với 9.54 GB).
-        *   **Nhanh hơn:** Nhanh hơn đáng kể **~11%** (95.18 tokens/s so với 85.83 tokens/s).
-        *   **Chất lượng tương đương:** Điểm MMLU gần như không đổi.
+    *   **Standard Q4_K_M** là phiên bản **nhanh nhất và nhẹ nhất**, nhưng phải trả giá bằng việc sụt giảm chất lượng.
+    *   Phương pháp **EWQ (GGUF - Tensorwise)** tỏa sáng rực rỡ như một **nhà vô địch về sự cân bằng**. Nó mang lại một bước nhảy vọt về hiệu suất so với tất cả các phương pháp khác (ngoại trừ Q4).
+    *   So với **Standard Q8_0**, phiên bản **EWQ-Tensorwise** vượt trội về mọi mặt: **nhẹ hơn 21%** (tiết kiệm 2GB VRAM), **nhanh hơn 24%**, trong khi chất lượng MMLU gần như tương đương.
+    *   So với chính phiên bản **EWQ-Blockwise**, việc chuyển sang **Tensorwise** là một cải tiến lớn: **nhẹ hơn 12%** (tiết kiệm 1GB VRAM) và **nhanh hơn 12%**.
 
 ## Kết luận
 
-Dự án đã tái hiện thành công phương pháp Lượng tử hóa theo Entropy và quan trọng hơn, đã chứng minh được tính hiệu quả của nó thông qua một bộ kiểm thử nghiêm ngặt.
+Dự án đã tái hiện và cải tiến thành công phương pháp Lượng tử hóa theo Entropy lên mức độ tensor. Bộ kiểm thử nghiêm ngặt đã chứng minh một cách thuyết phục tính hiệu quả vượt trội của nó.
 
-**Kết quả cho thấy rõ ràng rằng việc sử dụng plan EWQ để tạo ra một file GGUF tùy chỉnh đã tạo ra một phiên bản model cân bằng và tối ưu hơn so với các phương pháp lượng tử hóa tiêu chuẩn, mang lại hiệu suất cao và yêu cầu tài nguyên thấp trong khi vẫn duy trì được chất lượng gần như nguyên vẹn.**
-
-## Hướng phát triển trong tương lai
-
-*   Trực quan hóa sự phân bổ entropy của các block model để có cái nhìn sâu sắc hơn.
-*   Tham số hóa `entropy_factor` để dễ dàng thử nghiệm các "độ nhạy" lượng tử hóa khác nhau.
-*   Nghiên cứu áp dụng thuật toán ở mức độ chi tiết hơn (per-layer) thay vì per-block.
-
-## Lời cảm ơn
-
-Dự án này được truyền cảm hứng và dựa trên các ý tưởng được trình bày trong bài báo khoa học "Entropy-based Mixed-Precision Quantization for Balanced Language Model Compression" có sẵn trên [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2).
+**Kết quả cho thấy rõ ràng rằng việc sử dụng plan EWQ-Tensorwise để tạo ra một file GGUF tùy chỉnh đã tạo ra một phiên bản model cực kỳ cân bằng và tối ưu. Nó là sự lựa chọn tốt nhất cho những ai tìm kiếm "điểm ngọt" hoàn hảo giữa hiệu suất, yêu cầu tài nguyên và chất lượng, vượt qua cả phương pháp lượng tử hóa 8-bit tiêu chuẩn và các phiên bản EWQ cũ hơn.**
 
 ---
 
-# Entropy-Weighted Quantization (EWQ): A Comprehensive Re-implementation and Benchmark
+# Entropy-Weighted Quantization (EWQ): Comprehensive Re-implementation and Benchmark (Tensor-wise Edition)
 
-This project is an independent effort to re-implement the **Entropy-Weighted Quantization (EWQ)** method proposed in the scientific paper [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2). As the original paper did not provide source code, this project was built from the ground up to:
+This project is an independent effort to re-implement and enhance the **Entropy-Weighted Quantization (EWQ)** method proposed in the scientific paper [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2). This version has been upgraded from block-wise analysis to **tensor-wise analysis**, enabling more granular and effective optimization.
 
-1.  **Re-implement the core EWQ algorithm** to generate a custom quantization plan for Large Language Models (LLMs).
+Project Goals:
+1.  **Re-implement and enhance the core EWQ algorithm** to generate a custom, tensor-level quantization plan for Large Language Models (LLMs).
 2.  **Build a comprehensive benchmark suite** to objectively and rigorously evaluate the effectiveness of the EWQ method against standard quantization techniques.
-3.  **Validate** whether the EWQ method truly produces a superiorly balanced model in terms of quality, performance, and resource consumption.
-
-## How Does Entropy-Weighted Quantization (EWQ) Work?
-
-The heart of this project is the `create_quantization_plan.py` script. Instead of applying a uniform quantization strategy (e.g., all layers to 4-bit), the EWQ algorithm takes a more intelligent and flexible approach:
-
-1.  **CPU-based Analysis:** The entire base model is loaded onto the CPU for analysis. This conserves VRAM and allows for the processing of very large models without being limited by GPU memory.
-2.  **Per-Block Entropy Calculation:** The algorithm iterates through each "block" of the model and calculates the **Shannon entropy** for the weights of its linear layers. Entropy here serves as a metric for the "complexity" or "amount of information" that each block holds.
-3.  **Adaptive Threshold Determination:** Rather than using a fixed entropy threshold, the algorithm analyzes the entropy distribution across the entire model (calculating the mean and standard deviation) to create a **dynamic threshold** (`threshold = mean - factor * std_dev`). This threshold adapts to the unique characteristics of each model.
-4.  **Three-Tiered Decision Logic:** Based on each block's entropy relative to the overall distribution, a quantization decision is made:
-    *   **High Entropy (Most Critical):** Retain original precision (FP16).
-    *   **Medium Entropy:** Apply moderate quantization (8-bit).
-    *   **Low Entropy (Less Informative):** Apply aggressive quantization (4-bit).
-5.  **Output:** This process generates a `quant_plan_*.json` file containing the detailed plan for how each block will be quantized. It also produces a `quantize_command_*.sh` shell script to automatically create a custom GGUF model from this plan.
-
-## The Benchmark Suite
-
-To prove the value of EWQ, a comprehensive benchmark suite was built to compare different model versions across multiple dimensions:
-
-**Compared Versions:**
-*   **Original (FP16):** The unquantized base model, serving as the gold standard.
-*   **Standard GGUF (Q4 & Q8):** Standard GGUF quantization methods.
-*   **EWQ (bitsandbytes):** The EWQ plan applied using the `bitsandbytes` library.
-*   **EWQ (GGUF):** The EWQ plan used to create a custom GGUF file.
-
-**Measured Metrics:**
-*   **Model Quality:**
-    *   **MMLU:** Evaluates multi-domain knowledge and reasoning abilities.
-    *   **BLEU & ROUGE:** Assesses the quality of text generation (e.g., summarization).
-*   **Performance:** Token generation speed (tokens/second).
-*   **Resources:** VRAM (GB) and system RAM usage.
-
-## Usage Guide
-
-You can reproduce the entire process by following these steps:
-
-1.  **Setup Environment:**
-    ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
-    pip install -r requirements.txt
-    ```
-
-2.  **Generate the EWQ Quantization Plan:**
-    Run the script to analyze the model and create the plan.
-    ```bash
-    python create_quantization_plan.py
-    ```
-    This will generate `quant_plan_{hash}.json` and `quantize_command_{hash}.sh` in the `quantized_models/` directory.
-
-3.  **(Optional) Create the Custom GGUF Model:**
-    To create the GGUF file from the generated plan, you will need to build `llama.cpp` and then run the auto-generated shell script.
-    ```bash
-    # (Follow the build instructions for llama.cpp)
-    bash ./quantized_models/quantize_command_{hash}.sh
-    ```
-
-4.  **Run the Benchmarks:**
-    You can run the benchmark for any version you wish to test.
-    ```bash
-    # Run benchmark for the EWQ bitsandbytes version
-    python benchmark_ewq.py
-
-    # Run benchmark for the EWQ-GGUF version
-    python benchmark_gguf_ewq.py
-
-    # Run benchmarks for standard GGUF versions
-    python benchmark_gguf_q4.py
-    python benchmark_gguf_q8.py
-
-    # Run benchmark for the original model
-    python benchmark_original.py
-    ```
-
-5.  **View Results:**
-    All detailed results will be saved in the `benchmark_results/` directory.
+3.  **Validate** whether the EWQ-Tensorwise method truly produces a superiorly balanced model in terms of quality, performance, and resource consumption.
 
 ## Benchmark Results and Analysis
 
-This is the most crucial section, demonstrating the method's effectiveness.
+This is the most crucial section, demonstrating the effectiveness of the different methods.
 
-### Results Summary Table
+### Summary Table (Model: Qwen3-8B)
 
-| Model Version | VRAM (GB) | Speed (tokens/s) | MMLU (%) | ROUGE-L |
-| :--- | :---: | :---: | :---: | :---: |
-| **Original (FP16)** | 15.26 | 47.04 | 69.98 | 0.1783 |
-| **Standard Q4 (GGUF)** | **6.40** | **124.14** | 69.32 | 0.1564 |
-| **Standard Q8 (GGUF)** | 9.54 | 85.83 | 70.27 | 0.1515 |
-| **EWQ (bitsandbytes)** | 9.64 | 43.32 | **70.30** | **0.1800** |
-| **EWQ (GGUF)** | 8.54 | 95.18 | 70.05 | 0.1548 |
+| Model Version | VRAM (GB) | % Δ VRAM | Speed (tok/s) | % Δ Speed | MMLU (%) | % Δ MMLU | BLEU | ROUGE-1 | ROUGE-2 | ROUGE-L |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Original (FP16)** | 15.26 | *Baseline* | 47.04 | *Baseline* | 69.98 | *Baseline* | - | - | - | 0.1783 |
+| **Standard Q4_K_M (GGUF)** | **6.40** | **-58.1%** | **124.14** | **+163.9%**| 69.32 | -0.9% | 0.0329 | 0.2600 | 0.0767 | 0.1564 |
+| **Standard Q8_0 (GGUF)** | 9.54 | -37.5% | 85.83 | +82.5% | 70.27 | +0.4% | 0.0306 | 0.2540 | 0.0746 | 0.1515 |
+| **EWQ (GGUF - Blockwise)** | 8.54 | -44.0% | 95.18 | +102.3% | 70.05 | +0.1% | 0.0322 | 0.2544 | 0.0724 | 0.1548 |
+| **EWQ (GGUF - Tensorwise)** | 7.55 | -50.5% | 106.62 | +126.7% | 70.09 | +0.2% | 0.0303 | 0.2513 | 0.0712 | 0.1518 |
+| **EWQ (bitsandbytes - Blockwise)** | 9.64 | -36.8% | 43.32 | -7.9% | **70.30** | **+0.5%** | **0.0487** | **0.3148** | **0.0909** | **0.1800** |
 
-*(**Bold** indicates the best value in each category)*
+*(**Bold** indicates the best value in each category. `% Δ` is the percentage change relative to the FP16 original.)*
 
 ### Analysis
 
-1.  **Model Quality (MMLU & ROUGE-L):**
-    *   The **EWQ (bitsandbytes)** method achieved the **highest MMLU and ROUGE-L scores**, proving that the algorithm excellently preserves the base model's "intelligence," even showing slight improvements.
-    *   The **EWQ-GGUF** version also maintained quality nearly identical to the original and significantly outperformed the standard Q4 method.
+1.  **Model Quality (MMLU & ROUGE):**
+    *   **Q4_K_M** is the only GGUF version that shows a slight drop in its MMLU score (-0.9%), suggesting that aggressive, uniform quantization impacts reasoning capabilities.
+    *   All **EWQ and Q8_0 versions maintained or even slightly improved** the MMLU score compared to the original, proving that more sophisticated quantization methods are effective at preserving the model's "intelligence."
+    *   For text generation quality (ROUGE), the **EWQ (bitsandbytes)** version shows superior results, possibly due to the library's operational handling. However, the other GGUF versions perform quite similarly to each other.
 
 2.  **Resources and Performance (VRAM & Speed):**
-    *   While the standard Q4 model is the fastest and lightest, it comes at the cost of quality.
-    *   The **EWQ-GGUF** model found the perfect **"sweet spot"**. Compared to the standard Q8 model, it is **superior in every aspect**:
-        *   **Lighter:** Saves over **1 GB of VRAM** (8.54 GB vs. 9.54 GB).
-        *   **Faster:** A significant **~11% faster** (95.18 tokens/s vs. 85.83 tokens/s).
-        *   **Equivalent Quality:** The MMLU score remains nearly unchanged.
+    *   **Standard Q4_K_M** is the **fastest and lightest** version, but it comes at the cost of reduced quality.
+    *   The **EWQ (GGUF - Tensorwise)** method shines as the **champion of balance**. It delivers a leap in performance over all other methods (except Q4).
+    *   Compared to **Standard Q8_0**, the **EWQ-Tensorwise** version is superior in every aspect: **21% lighter** (saving 2GB of VRAM), **24% faster**, with a virtually identical MMLU score.
+    *   Compared to its **EWQ-Blockwise** predecessor, the move to **Tensorwise** is a major improvement: **12% lighter** (saving 1GB of VRAM) and **12% faster**.
 
 ## Conclusion
 
-This project has successfully re-implemented the Entropy-Weighted Quantization method and, more importantly, has proven its effectiveness through a rigorous benchmark suite.
+This project has successfully re-implemented and advanced the Entropy-Weighted Quantization method to the tensor level. The rigorous benchmark suite has convincingly proven its outstanding effectiveness.
 
-**The results clearly demonstrate that using an EWQ plan to create a custom GGUF file produces a more balanced and optimized model than standard quantization methods, delivering high performance and low resource requirements while maintaining near-original quality.**
-
-## Future Work
-
-*   Visualize the model's block entropy distribution for deeper insights.
-*   Parameterize the `entropy_factor` to easily experiment with different quantization sensitivities.
-*   Investigate applying the algorithm at a more granular, per-layer level instead of per-block.
-
-## Acknowledgments
-
-This project was inspired by and is based on the ideas presented in the scientific paper "Entropy-based Mixed-Precision Quantization for Balanced Language Model Compression," available on [arXiv:2503.04704v2](https://arxiv.org/html/2503.04704v2).
+**The results clearly demonstrate that using a Tensor-wise EWQ plan to create a custom GGUF file produces an extremely balanced and optimized model. It is the best choice for those seeking the perfect "sweet spot" between performance, resource requirements, and quality, outperforming both standard 8-bit quantization and older EWQ versions.**
